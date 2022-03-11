@@ -1,0 +1,4 @@
+/target/
+/.idea/
+/src/main/java/me/huanmeng/util/sql/SQLibraryTest.java
+/src/main/java/me/huanmeng/util/sql/test/
