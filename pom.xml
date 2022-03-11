@@ -68,16 +68,40 @@
         </dependency>
     </dependencies>
 
-    <profiles>
-        <profile>
+    <distributionManagement>
+        <repository>
             <id>github</id>
-            <distributionManagement>
-                <repository>
-                    <id>github</id>
-                    <name>GitHub huanmeng-qwq Apache Maven Packages</name>
-                    <url>https://maven.pkg.github.com/huanmeng-qwq/SQLibrary</url>
-                </repository>
-            </distributionManagement>
-        </profile>
-    </profiles>
+            <name>GitHub huanmeng-qwq Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/huanmeng-qwq/SQLibrary</url>
+        </repository>
+    </distributionManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>3.0.1</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <gpgArguments>
+                        <arg>--pinentry-mode</arg>
+                        <arg>loopback</arg>
+                    </gpgArguments>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
