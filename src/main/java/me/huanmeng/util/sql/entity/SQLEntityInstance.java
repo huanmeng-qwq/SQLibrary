@@ -51,6 +51,7 @@ public class SQLEntityInstance<T> {
         } else if (keys.size() >= 2) {
             table.setIndex(IndexType.PRIMARY_KEY, null, keys.remove(0), keys.toArray(new String[0]));
         }
+        table.setTableSettings("ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
         table.build().execute();
     }
 
@@ -86,6 +87,16 @@ public class SQLEntityInstance<T> {
         final ArrayList<Object> list = Lists.newArrayList();
         for (SQLEntityFieldMetaData<T> field : metaData.getFields()) {
             if (field.isKey() && !field.isAutoIncrement()) {
+                list.add(field.getValue(entity));
+            }
+        }
+        return list.toArray(new Object[0]);
+    }
+
+    public Object[] getKeyValues(T entity, boolean all) {
+        final ArrayList<Object> list = Lists.newArrayList();
+        for (SQLEntityFieldMetaData<T> field : metaData.getFields()) {
+            if (field.isKey() && (all || !field.isAutoIncrement())) {
                 list.add(field.getValue(entity));
             }
         }

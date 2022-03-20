@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 /**
  * 2022/1/29<br>
@@ -52,11 +53,15 @@ public class SQLEntityMetaData<T> {
         }
     }
 
-    public SQLEntityFieldMetaData<T> getField(String name){
-        return fields.stream().filter(e->e.getFieldName().equals(name)).findFirst().orElse(null);
+    public SQLEntityFieldMetaData<T> getField(String name) {
+        return fields.stream().filter(e -> e.getFieldName().equals(name)).findFirst().orElse(null);
     }
 
     public List<SQLEntityFieldMetaData<T>> getFields() {
         return Collections.unmodifiableList(fields);
+    }
+
+    public List<SQLEntityFieldMetaData<T>> getAutoIncrementFields() {
+        return getFields().stream().filter(SQLEntityFieldMetaData::isAutoIncrement).collect(Collectors.toList());
     }
 }

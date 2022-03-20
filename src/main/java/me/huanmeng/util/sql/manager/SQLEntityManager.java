@@ -26,6 +26,10 @@ public interface SQLEntityManager<T> {
     @Deprecated
     T select(Object... values);
 
+    T selectFirst(String[] name,Object... values);
+
+    List<T> selectAny(String[] name,Object... values);
+
     /**
      * 查询1个实体
      *
@@ -142,4 +146,10 @@ public interface SQLEntityManager<T> {
      * @param run 执行
      */
     void custom(BiConsumer<SQLManager, SQLEntityInstance<T>> run);
+
+    boolean toggleDebug();
+
+    void setDebug(boolean debug);
+
+    boolean isDebug();
 }

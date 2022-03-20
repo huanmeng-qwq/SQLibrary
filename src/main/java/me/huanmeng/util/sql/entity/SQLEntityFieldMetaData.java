@@ -1,17 +1,22 @@
 package me.huanmeng.util.sql.entity;
 
+import cc.carm.lib.easysql.api.SQLManager;
 import cn.hutool.core.annotation.AnnotationUtil;
 import cn.hutool.core.convert.ConverterRegistry;
+import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import me.huanmeng.util.sql.annotation.SQLField;
+import me.huanmeng.util.sql.annotation.SQLIgnore;
 import me.huanmeng.util.sql.util.SQLType;
 import me.huanmeng.util.sql.util.SQLTypeUtils;
+import me.huanmeng.util.sql.util.VersionUtils;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.Optional;
-import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 /**
@@ -22,7 +27,8 @@ import java.util.logging.Logger;
  */
 @Getter
 public class SQLEntityFieldMetaData<T> {
-    private static final Logger log = LogManager.getLogManager().getLogger("SQLEntityField");
+    private static final String EASY_SQL_VERSION = VersionUtils.getMavenVersion(SQLManager.class, "cc.carm.lib/easysql-api");
+    private static final Logger log = Logger.getLogger("SQLEntityField");
     private final Field field;
     private String fieldName;
     private boolean key;
@@ -71,14 +77,28 @@ public class SQLEntityFieldMetaData<T> {
 
     public void setValue(T instance, Object type) {
         try {
+            final Method method = ReflectUtil.getMethod(instance.getClass(), true, "set" + field.getName(), this.type);
+            if (method != null) {
+                if (!AnnotationUtil.hasAnnotation(method, SQLIgnore.class)) {
+                    ReflectUtil.invoke(instance, method, type);
+                    return;
+                }
+            }
             field.set(instance, ConverterRegistry.getInstance().convert(getType(), type));
         } catch (Exception e) {
             throw new RuntimeException(String.format("设置字段 %s 时出先了错误,value:%s", getType().getSimpleName() + "#" + fieldName, type), e);
         }
     }
 
+
     @SneakyThrows
     public Object getValue(T entity) {
-        return field.get(entity);
+        Object o = field.get(entity);
+        if (VersionUtils.isOldOrIs("0.3.8", EASY_SQL_VERSION)) {
+            if (o instanceof Collection) {
+                o = o.toString();
+            }
+        }
+        return o;
     }
 }

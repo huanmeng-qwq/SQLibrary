@@ -3,7 +3,7 @@ package me.huanmeng.util.sql.test;
 import lombok.*;
 import me.huanmeng.util.sql.annotation.SQLField;
 
-import java.util.Objects;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -22,21 +22,5 @@ public class UserData {
     private int id;
     @SQLField(id = true)
     private UUID uuid;
-    @SQLField(id = true)
-    private String type;
-    private int coin;
-    private boolean a;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        UserData userData = (UserData) o;
-        return coin == userData.coin && a == userData.a && uuid.equals(userData.uuid) && type.equals(userData.type);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(uuid, type, coin, a);
-    }
+    private List<String> data;
 }
