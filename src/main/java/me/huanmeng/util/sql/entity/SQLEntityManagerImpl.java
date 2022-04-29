@@ -4,7 +4,6 @@ import cc.carm.lib.easysql.api.SQLAction;
 import cc.carm.lib.easysql.api.SQLManager;
 import cc.carm.lib.easysql.api.SQLQuery;
 import cc.carm.lib.easysql.api.builder.TableQueryBuilder;
-import cn.hutool.core.util.ReflectUtil;
 import com.google.common.collect.Lists;
 import lombok.SneakyThrows;
 import me.huanmeng.util.sql.manager.SQLEntityManager;
@@ -249,7 +248,6 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
                     .addCondition(field.getFieldName(), field.getValue(entity))
                     .setColumnValues(holder.getNames(false), holder.getValues(entity, false))
                     .build();
-            System.out.println(Arrays.toString((Object[]) ReflectUtil.getFieldValue(sqlAction, "params")));
             sqlAction.execute();
             return;
         }
