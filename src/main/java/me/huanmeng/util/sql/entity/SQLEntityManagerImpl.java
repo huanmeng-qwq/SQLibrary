@@ -4,6 +4,7 @@ import cc.carm.lib.easysql.api.SQLAction;
 import cc.carm.lib.easysql.api.SQLManager;
 import cc.carm.lib.easysql.api.SQLQuery;
 import cc.carm.lib.easysql.api.builder.TableQueryBuilder;
+import cn.hutool.core.util.ReflectUtil;
 import com.google.common.collect.Lists;
 import lombok.SneakyThrows;
 import me.huanmeng.util.sql.manager.SQLEntityManager;
@@ -243,25 +244,13 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
         final List<SQLEntityFieldMetaData<T>> list = holder.getMetaData().getAutoIncrementFields();
         if (list.size() == 1) {
             final SQLEntityFieldMetaData<T> field = list.get(0);
-            final SQLAction<Integer> sqlAction = holder.getSqlManager().createUpdate(holder.getMetaData().getTableName())
+            final SQLAction<Long> sqlAction = holder.getSqlManager().createUpdate(holder.getMetaData().getTableName())
                     .setLimit(1)
                     .addCondition(field.getFieldName(), field.getValue(entity))
                     .setColumnValues(holder.getNames(false), holder.getValues(entity, false))
                     .build();
+            System.out.println(Arrays.toString((Object[]) ReflectUtil.getFieldValue(sqlAction, "params")));
             sqlAction.execute();
-            /*try {
-            } catch (SQLException e) {
-                if (sqlAction instanceof PreparedSQLUpdateActionImpl) {
-                    final Object params = ReflectUtil.getFieldValue(sqlAction, "params");
-                    if (ArrayUtil.isArray(params)) {
-                        System.out.println(ArrayUtil.toString(params));
-                    } else {
-                        System.out.println("params: " + params);
-                    }
-                    System.out.println(sqlAction.getSQLContent());
-                }
-                e.printStackTrace();
-            }*/
             return;
         }
         holder.getSqlManager().createUpdate(holder.getMetaData().getTableName())

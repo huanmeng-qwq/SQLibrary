@@ -94,10 +94,8 @@ public class SQLEntityFieldMetaData<T> {
     @SneakyThrows
     public Object getValue(T entity) {
         Object o = field.get(entity);
-        if (VersionUtils.isOldOrIs("0.3.8", EASY_SQL_VERSION)) {
-            if (o instanceof Collection) {
-                o = o.toString();
-            }
+        if (o instanceof Collection) {
+            o = o.toString();
         }
         return o;
     }

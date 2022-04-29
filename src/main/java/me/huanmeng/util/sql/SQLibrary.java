@@ -1,6 +1,5 @@
 package me.huanmeng.util.sql;
 
-import cc.carm.lib.easysql.EasySQL;
 import cc.carm.lib.easysql.api.SQLManager;
 import cc.carm.lib.easysql.beecp.BeeDataSource;
 import cc.carm.lib.easysql.beecp.BeeDataSourceConfig;
@@ -29,7 +28,7 @@ public class SQLibrary {
     }
 
     public static <T> SQLEntityManager<T> getManager(Class<T> clazz, SQLManager sqlManager) {
-        return (SQLEntityManager<T>) getInstance(clazz, sqlManager).getSqlManager();
+        return (SQLEntityManager<T>) getInstance(clazz, sqlManager).getSqlEntityManager();
     }
 
     public static SQLManager createManager(@NotNull String driver, @NotNull String url, @NotNull String username, @Nullable String password) {
