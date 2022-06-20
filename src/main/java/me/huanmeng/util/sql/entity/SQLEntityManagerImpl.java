@@ -243,7 +243,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
         final List<SQLEntityFieldMetaData<T>> list = holder.getMetaData().getAutoIncrementFields();
         if (list.size() == 1) {
             final SQLEntityFieldMetaData<T> field = list.get(0);
-            final SQLAction<Long> sqlAction = holder.getSqlManager().createUpdate(holder.getMetaData().getTableName())
+            final SQLAction<Integer> sqlAction = holder.getSqlManager().createUpdate(holder.getMetaData().getTableName())
                     .setLimit(1)
                     .addCondition(field.getFieldName(), field.getValue(entity))
                     .setColumnValues(holder.getNames(false), holder.getValues(entity, false))

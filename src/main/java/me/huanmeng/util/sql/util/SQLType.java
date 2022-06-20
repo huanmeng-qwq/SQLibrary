@@ -1,5 +1,6 @@
 package me.huanmeng.util.sql.util;
 
+import cn.hutool.core.convert.Convert;
 import lombok.*;
 import me.huanmeng.util.sql.entity.SQLEntityFieldMetaData;
 
@@ -41,7 +42,7 @@ public class SQLType {
             if (fieldFunction != null) {
                 meta.setValue(t, fieldFunction.apply(resultSet, meta));
             } else if (fieldNameFunction == null) {
-                meta.setValue(t, getResult(resultSet, meta.getFieldName()));
+                meta.setValue(t, getResult(resultSet, meta));
             } else {
                 meta.setValue(t, fieldNameFunction.apply(resultSet, meta.getFieldName()));
             }
@@ -49,9 +50,8 @@ public class SQLType {
         };
     }
 
-    @SuppressWarnings("unchecked")
     @SneakyThrows
-    public <R> R getResult(ResultSet rs, String name) {
-        return (R) rs.getString(name);
+    public Object getResult(ResultSet rs, SQLEntityFieldMetaData<?> meta) {
+        return Convert.convert(meta.getType(), rs.getString(meta.getFieldName()));
     }
 }

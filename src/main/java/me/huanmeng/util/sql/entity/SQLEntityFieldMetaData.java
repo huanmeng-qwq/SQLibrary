@@ -2,7 +2,9 @@ package me.huanmeng.util.sql.entity;
 
 import cc.carm.lib.easysql.api.SQLManager;
 import cn.hutool.core.annotation.AnnotationUtil;
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.convert.ConverterRegistry;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.Getter;
@@ -13,8 +15,10 @@ import me.huanmeng.util.sql.util.SQLType;
 import me.huanmeng.util.sql.util.SQLTypeUtils;
 import me.huanmeng.util.sql.util.VersionUtils;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -70,7 +74,6 @@ public class SQLEntityFieldMetaData<T> {
                     return f;
                 }).orElseGet(() -> {
                     fieldName = field.getName();
-                    log.warning(String.format("%s not found @SQLField annotation", fieldName));
                     return null;
                 });
     }
@@ -84,9 +87,9 @@ public class SQLEntityFieldMetaData<T> {
                     return;
                 }
             }
-            field.set(instance, ConverterRegistry.getInstance().convert(getType(), type));
+            field.set(instance, Convert.convert(getType(), type));
         } catch (Exception e) {
-            throw new RuntimeException(String.format("设置字段 %s 时出先了错误,value:%s", getType().getSimpleName() + "#" + fieldName, type), e);
+            throw new RuntimeException(String.format("设置字段 %s 时出现了错误,value:%s", getType().getSimpleName() + "#" + fieldName, type), e);
         }
     }
 
@@ -96,6 +99,8 @@ public class SQLEntityFieldMetaData<T> {
         Object o = field.get(entity);
         if (o instanceof Collection) {
             o = o.toString();
+        }else if(ArrayUtil.isArray(o)){
+            return ArrayUtil.toString(o);
         }
         return o;
     }

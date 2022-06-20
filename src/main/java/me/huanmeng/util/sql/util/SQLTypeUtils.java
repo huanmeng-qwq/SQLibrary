@@ -13,6 +13,7 @@ import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
+import java.util.logging.Logger;
 
 /**
  * 2022/1/29<br>
@@ -21,7 +22,7 @@ import java.util.function.BiFunction;
  * @author huanmeng_qwq
  */
 public class SQLTypeUtils {
-
+    private static final Logger log = Logger.getLogger("SQLTypes");
     private static final Map<Class<?>, SQLType> types = new ConcurrentHashMap<>();
 
     static {
@@ -115,6 +116,10 @@ public class SQLTypeUtils {
 
 
     public static SQLType getSQLType(Class<?> clazz) {
-        return types.computeIfAbsent(ClassUtil.isBasicType(clazz) ? BasicType.unWrap(clazz) : clazz, e -> new SQLType("VARCHAR", 255));
+        return types.computeIfAbsent(ClassUtil.isBasicType(clazz) ? BasicType.unWrap(clazz) : clazz, e -> {
+            log.warning("No SQLType registered for class " + clazz.getName());
+            log.warning("Using default SQLType(VARCHAR 255) for class " + clazz.getName());
+            return new SQLType("VARCHAR", 255);
+        });
     }
 }
