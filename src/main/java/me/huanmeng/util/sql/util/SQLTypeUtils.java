@@ -1,6 +1,7 @@
 package me.huanmeng.util.sql.util;
 
 import cn.hutool.core.convert.BasicType;
+import cn.hutool.core.convert.impl.ArrayConverter;
 import cn.hutool.core.convert.impl.CollectionConverter;
 import cn.hutool.core.convert.impl.MapConverter;
 import cn.hutool.core.util.ClassUtil;
@@ -74,9 +75,16 @@ public class SQLTypeUtils {
                 }
             }
         });
-        final BiFunction<ResultSet, SQLEntityFieldMetaData<?>, Object> function = (rs, field) -> {
+        final BiFunction<ResultSet, SQLEntityFieldMetaData<?>, Object> collectionFunction = (rs, field) -> {
             try {
                 return new CollectionConverter(field.getType()).convert(rs.getString(field.getFieldName()), null);
+            } catch (SQLException e) {
+                return null;
+            }
+        };
+        final BiFunction<ResultSet, SQLEntityFieldMetaData<?>, Object> arrayFunction = (rs, field) -> {
+            try {
+                return new ArrayConverter(field.getType()).convert(rs.getString(field.getFieldName()), null);
             } catch (SQLException e) {
                 return null;
             }
@@ -88,9 +96,26 @@ public class SQLTypeUtils {
                 return null;
             }
         });
-        SQLTypeUtils.registerSQLTypeWithField(Set.class, new SQLType("MEDIUMTEXT"), function);
-        SQLTypeUtils.registerSQLTypeWithField(List.class, new SQLType("MEDIUMTEXT"), function);
-        SQLTypeUtils.registerSQLTypeWithField(Collection.class, new SQLType("MEDIUMTEXT"), function);
+        SQLTypeUtils.registerSQLTypeWithField(Set.class, new SQLType("MEDIUMTEXT"), collectionFunction);
+        SQLTypeUtils.registerSQLTypeWithField(List.class, new SQLType("MEDIUMTEXT"), collectionFunction);
+        SQLTypeUtils.registerSQLTypeWithField(Collection.class, new SQLType("MEDIUMTEXT"), collectionFunction);
+
+        SQLTypeUtils.registerSQLTypeWithField(int[].class, new SQLType("MEDIUMTEXT"), arrayFunction);
+        SQLTypeUtils.registerSQLTypeWithField(Integer[].class, new SQLType("MEDIUMTEXT"), arrayFunction);
+        SQLTypeUtils.registerSQLTypeWithField(Double[].class, new SQLType("MEDIUMTEXT"), arrayFunction);
+        SQLTypeUtils.registerSQLTypeWithField(double[].class, new SQLType("MEDIUMTEXT"), arrayFunction);
+        SQLTypeUtils.registerSQLTypeWithField(Long[].class, new SQLType("MEDIUMTEXT"), arrayFunction);
+        SQLTypeUtils.registerSQLTypeWithField(long[].class, new SQLType("MEDIUMTEXT"), arrayFunction);
+        SQLTypeUtils.registerSQLTypeWithField(Short[].class, new SQLType("MEDIUMTEXT"), arrayFunction);
+        SQLTypeUtils.registerSQLTypeWithField(short[].class, new SQLType("MEDIUMTEXT"), arrayFunction);
+        SQLTypeUtils.registerSQLTypeWithField(Float[].class, new SQLType("MEDIUMTEXT"), arrayFunction);
+        SQLTypeUtils.registerSQLTypeWithField(float[].class, new SQLType("MEDIUMTEXT"), arrayFunction);
+        SQLTypeUtils.registerSQLTypeWithField(Boolean[].class, new SQLType("MEDIUMTEXT"), arrayFunction);
+        SQLTypeUtils.registerSQLTypeWithField(boolean[].class, new SQLType("MEDIUMTEXT"), arrayFunction);
+        SQLTypeUtils.registerSQLTypeWithField(String[].class, new SQLType("MEDIUMTEXT"), arrayFunction);
+        SQLTypeUtils.registerSQLTypeWithField(Object[].class, new SQLType("MEDIUMTEXT"), arrayFunction);
+        SQLTypeUtils.registerSQLTypeWithField(String[].class, new SQLType("MEDIUMTEXT"), arrayFunction);
+
         SQLTypeUtils.registerSQLType(Timestamp.class, new SQLType("DATETIME"), (rs, name) -> {
             try {
                 return rs.getTimestamp(name);
@@ -98,6 +123,8 @@ public class SQLTypeUtils {
                 return null;
             }
         });
+
+
     }
 
     public static void registerSQLType(Class<?> clazz, SQLType type) {
