@@ -1,9 +1,10 @@
 package me.huanmeng.util.sql.util;
 
 import cn.hutool.core.convert.BasicType;
-import cn.hutool.core.convert.impl.ArrayConverter;
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.convert.impl.CollectionConverter;
 import cn.hutool.core.convert.impl.MapConverter;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ClassUtil;
 import lombok.SneakyThrows;
 import me.huanmeng.util.sql.entity.SQLEntityFieldMetaData;
@@ -88,7 +89,18 @@ public class SQLTypeUtils {
                 int min = Math.min(data.length(), 1);
                 int max = Math.max(0, data.length() - 1);
                 String str = data.substring(min, max);
-                return new ArrayConverter(field.getType()).convert(str, null);
+                String[] strings = Arrays.stream(str.split(",")).map(String::trim).toArray(String[]::new);
+                Class<?> componentType = field.getComponentType();
+                Object[] array = ArrayUtil.newArray(componentType, strings.length);
+                for (int i = 0; i < strings.length; i++) {
+                    String s = strings[i];
+                    if (s.equals("null")) {
+                        array[i] = null;
+                    } else {
+                        array[i] = Convert.convert(componentType, s, ClassUtil.getDefaultValue(componentType));
+                    }
+                }
+                return array;
             } catch (SQLException e) {
                 return null;
             }

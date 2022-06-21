@@ -34,6 +34,7 @@ public class SQLEntityFieldMetaData<T> {
     private String fieldName;
     private boolean key;
     private Class<?> type;
+    private Class<?> componentType;
     private SQLType sqlType;
     private boolean isAutoIncrement;
     private SQLField.Order order = SQLField.Order.NONE;
@@ -46,6 +47,7 @@ public class SQLEntityFieldMetaData<T> {
     private void init() {
         field.setAccessible(true);
         type = field.getType();
+        componentType = field.getType().getComponentType();
         sqlType = SQLTypeUtils.getSQLType(type);
         Optional.ofNullable(AnnotationUtil.getAnnotation(field, SQLField.class))
                 .map(f -> {
