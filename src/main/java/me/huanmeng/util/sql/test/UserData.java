@@ -22,5 +22,6 @@ public class UserData {
     private int id;
     @SQLField(id = true)
     private UUID uuid;
-    private List<String> data;
+    @SQLField
+    private Integer[] data;
 }

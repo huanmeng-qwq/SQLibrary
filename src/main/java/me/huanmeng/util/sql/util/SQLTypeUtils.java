@@ -84,11 +84,11 @@ public class SQLTypeUtils {
         };
         final BiFunction<ResultSet, SQLEntityFieldMetaData<?>, Object> arrayFunction = (rs, field) -> {
             try {
-                String data = field.getFieldName();
+                String data = rs.getString(field.getFieldName());
                 int min = Math.min(data.length(), 1);
                 int max = Math.max(0, data.length() - 1);
                 String str = data.substring(min, max);
-                return new ArrayConverter(field.getType()).convert(rs.getString(str), null);
+                return new ArrayConverter(field.getType()).convert(str, null);
             } catch (SQLException e) {
                 return null;
             }

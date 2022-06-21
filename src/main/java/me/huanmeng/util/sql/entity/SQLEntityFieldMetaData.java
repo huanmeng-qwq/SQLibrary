@@ -3,7 +3,6 @@ package me.huanmeng.util.sql.entity;
 import cc.carm.lib.easysql.api.SQLManager;
 import cn.hutool.core.annotation.AnnotationUtil;
 import cn.hutool.core.convert.Convert;
-import cn.hutool.core.convert.ConverterRegistry;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
@@ -15,10 +14,8 @@ import me.huanmeng.util.sql.util.SQLType;
 import me.huanmeng.util.sql.util.SQLTypeUtils;
 import me.huanmeng.util.sql.util.VersionUtils;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -99,7 +96,7 @@ public class SQLEntityFieldMetaData<T> {
         Object o = field.get(entity);
         if (o instanceof Collection) {
             o = o.toString();
-        }else if(ArrayUtil.isArray(o)){
+        } else if (ArrayUtil.isArray(o)) {
             return ArrayUtil.toString(o);
         }
         return o;
