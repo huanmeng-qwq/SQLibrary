@@ -10,7 +10,6 @@ import lombok.SneakyThrows;
 import me.huanmeng.util.sql.entity.SQLEntityFieldMetaData;
 
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -40,21 +39,21 @@ public class SQLTypeUtils {
         registerSQLType(long.class, new SQLType("MEDIUMINT"), (rs, name) -> {
             try {
                 return rs.getLong(name);
-            } catch (SQLException e) {
+            } catch (Exception e) {
                 return null;
             }
         });
         registerSQLType(int.class, new SQLType("MEDIUMINT"), (rs, name) -> {
             try {
                 return rs.getInt(name);
-            } catch (SQLException e) {
+            } catch (Exception e) {
                 return null;
             }
         });
         registerSQLType(double.class, new SQLType("DOUBLE"), (rs, name) -> {
             try {
                 return rs.getDouble(name);
-            } catch (SQLException e) {
+            } catch (Exception e) {
                 return null;
             }
         });
@@ -79,7 +78,7 @@ public class SQLTypeUtils {
         final BiFunction<ResultSet, SQLEntityFieldMetaData<?>, Object> collectionFunction = (rs, field) -> {
             try {
                 return new CollectionConverter(field.getType()).convert(rs.getString(field.getFieldName()), null);
-            } catch (SQLException e) {
+            } catch (Exception e) {
                 return null;
             }
         };
@@ -101,14 +100,14 @@ public class SQLTypeUtils {
                     }
                 }
                 return array;
-            } catch (SQLException e) {
+            } catch (Exception e) {
                 return null;
             }
         };
         SQLTypeUtils.registerSQLTypeWithField(Map.class, new SQLType("MEDIUMTEXT"), (rs, field) -> {
             try {
                 return new MapConverter(field.getType()).convert(rs.getString(field.getFieldName()), null);
-            } catch (SQLException e) {
+            } catch (Exception e) {
                 return null;
             }
         });
@@ -135,7 +134,7 @@ public class SQLTypeUtils {
         SQLTypeUtils.registerSQLType(Timestamp.class, new SQLType("DATETIME"), (rs, name) -> {
             try {
                 return rs.getTimestamp(name);
-            } catch (SQLException e) {
+            } catch (Exception e) {
                 return null;
             }
         });
