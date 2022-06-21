@@ -84,7 +84,11 @@ public class SQLTypeUtils {
         };
         final BiFunction<ResultSet, SQLEntityFieldMetaData<?>, Object> arrayFunction = (rs, field) -> {
             try {
-                return new ArrayConverter(field.getType()).convert(rs.getString(field.getFieldName()), null);
+                String data = field.getFieldName();
+                int min = Math.min(data.length(), 1);
+                int max = Math.max(0, data.length() - 1);
+                String str = data.substring(min, max);
+                return new ArrayConverter(field.getType()).convert(rs.getString(str), null);
             } catch (SQLException e) {
                 return null;
             }
@@ -123,8 +127,6 @@ public class SQLTypeUtils {
                 return null;
             }
         });
-
-
     }
 
     public static void registerSQLType(Class<?> clazz, SQLType type) {
