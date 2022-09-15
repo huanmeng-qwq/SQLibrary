@@ -3,7 +3,6 @@ package me.huanmeng.util.sql.entity;
 import cc.carm.lib.easysql.api.SQLManager;
 import cc.carm.lib.easysql.api.builder.TableCreateBuilder;
 import cc.carm.lib.easysql.api.enums.IndexType;
-import com.google.common.collect.Lists;
 import lombok.Getter;
 import lombok.SneakyThrows;
 
@@ -74,7 +73,7 @@ public class SQLEntityInstance<T> {
     }
 
     public String[] getKeyNames(boolean all) {
-        final ArrayList<String> list = Lists.newArrayList();
+        final ArrayList<String> list = new ArrayList<>();
         for (SQLEntityFieldMetaData<T> field : metaData.getFields()) {
             if (field.isKey() && (!field.isAutoIncrement() || all)) {
                 list.add(field.getFieldName());
@@ -84,7 +83,7 @@ public class SQLEntityInstance<T> {
     }
 
     public Object[] getKeyValues(T entity) {
-        final ArrayList<Object> list = Lists.newArrayList();
+        final ArrayList<Object> list = new ArrayList<>();
         for (SQLEntityFieldMetaData<T> field : metaData.getFields()) {
             if (field.isKey() && !field.isAutoIncrement()) {
                 list.add(field.getValue(entity));
@@ -94,7 +93,7 @@ public class SQLEntityInstance<T> {
     }
 
     public Object[] getKeyValues(T entity, boolean all) {
-        final ArrayList<Object> list = Lists.newArrayList();
+        final ArrayList<Object> list = new ArrayList<>();
         for (SQLEntityFieldMetaData<T> field : metaData.getFields()) {
             if (field.isKey() && (all || !field.isAutoIncrement())) {
                 list.add(field.getValue(entity));
@@ -104,7 +103,7 @@ public class SQLEntityInstance<T> {
     }
 
     public String[] getFieldNames() {
-        final ArrayList<String> list = Lists.newArrayList();
+        final ArrayList<String> list = new ArrayList<>();
         for (SQLEntityFieldMetaData<T> field : metaData.getFields()) {
             if (!field.isKey() && !field.isAutoIncrement()) {
                 list.add(field.getFieldName());
@@ -114,7 +113,7 @@ public class SQLEntityInstance<T> {
     }
 
     public Object[] getFieldValues(T entity) {
-        final ArrayList<Object> list = Lists.newArrayList();
+        final ArrayList<Object> list = new ArrayList<>();
         for (SQLEntityFieldMetaData<T> field : metaData.getFields()) {
             if (!field.isKey() && !field.isAutoIncrement()) {
                 list.add(field.getValue(entity));
@@ -124,7 +123,7 @@ public class SQLEntityInstance<T> {
     }
 
     public String[] getNames(boolean all) {
-        final ArrayList<String> list = Lists.newArrayList();
+        final ArrayList<String> list = new ArrayList<>();
         for (SQLEntityFieldMetaData<T> field : metaData.getFields()) {
             if (!field.isAutoIncrement() || all) {
                 list.add(field.getFieldName());
@@ -142,7 +141,7 @@ public class SQLEntityInstance<T> {
     }
 
     public Object[] getValues(T entity, boolean all) {
-        final ArrayList<Object> list = Lists.newArrayList();
+        final ArrayList<Object> list = new ArrayList<>();
         for (SQLEntityFieldMetaData<T> field : metaData.getFields()) {
             if (!field.isAutoIncrement() || all) {
                 list.add(field.getValue(entity));

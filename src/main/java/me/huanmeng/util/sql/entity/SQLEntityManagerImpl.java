@@ -4,7 +4,6 @@ import cc.carm.lib.easysql.api.SQLAction;
 import cc.carm.lib.easysql.api.SQLManager;
 import cc.carm.lib.easysql.api.SQLQuery;
 import cc.carm.lib.easysql.api.builder.TableQueryBuilder;
-import com.google.common.collect.Lists;
 import lombok.SneakyThrows;
 import me.huanmeng.util.sql.manager.SQLEntityManager;
 
@@ -59,7 +58,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     @SneakyThrows
     @Override
     public List<T> selectAny(String[] name, Object... values) {
-        List<T> list = Lists.newArrayList();
+        List<T> list = new ArrayList<>();
         final TableQueryBuilder builder = holder.getSqlManager().createQuery()
                 .inTable(holder.getMetaData().getTableName())
                 .addCondition(name, values);
@@ -115,7 +114,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
         final SQLQuery query = tableQueryBuilder
                 .build().execute();
         final ResultSet resultSet = query.getResultSet();
-        final ArrayList<T> ts = Lists.newArrayList();
+        final ArrayList<T> ts = new ArrayList<>();
         while (resultSet.next()) {
             ts.add(holder.transform(resultSet));
         }
@@ -157,7 +156,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
         final SQLQuery query = tableQueryBuilder
                 .build().execute();
         final ResultSet resultSet = query.getResultSet();
-        final ArrayList<T> ts = Lists.newArrayList();
+        final ArrayList<T> ts = new ArrayList<>();
         while (resultSet.next()) {
             ts.add(holder.transform(resultSet));
         }
@@ -191,7 +190,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
         final SQLQuery query = tableQueryBuilder
                 .build().execute();
         final ResultSet resultSet = query.getResultSet();
-        final ArrayList<T> ts = Lists.newArrayList();
+        final ArrayList<T> ts = new ArrayList<>();
         while (resultSet.next()) {
             ts.add(holder.transform(resultSet));
         }
@@ -213,7 +212,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
                 .build()
                 .execute();
         final ResultSet resultSet = query.getResultSet();
-        final ArrayList<T> ts = Lists.newArrayList();
+        final ArrayList<T> ts = new ArrayList<>();
         while (resultSet.next()) {
             ts.add(holder.transform(resultSet));
         }
@@ -229,7 +228,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
                 .build()
                 .execute();
         final ResultSet resultSet = query.getResultSet();
-        final ArrayList<T> ts = Lists.newArrayList();
+        final ArrayList<T> ts = new ArrayList<>();
         while (resultSet.next()) {
             ts.add(holder.transform(resultSet));
         }
