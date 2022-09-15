@@ -1,14 +1,18 @@
 package me.huanmeng.util.sql.entity;
 
 import cc.carm.lib.easysql.api.SQLManager;
+import cc.carm.lib.easysql.api.builder.TableAlterBuilder;
 import cc.carm.lib.easysql.api.builder.TableCreateBuilder;
 import cc.carm.lib.easysql.api.enums.IndexType;
+import cc.carm.lib.easysql.api.enums.NumberType;
 import lombok.Getter;
 import lombok.SneakyThrows;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 2022/1/29<br>
@@ -45,6 +49,7 @@ public class SQLEntityInstance<T> {
                 table.addColumn(field.getFieldName(), field.getSqlType().toSQLString());
             }
         }
+        ArrayList<String> alterList = new ArrayList<>(keys);
         if (keys.size() == 1) {
             table.setIndex(keys.remove(0), IndexType.PRIMARY_KEY);
         } else if (keys.size() >= 2) {
@@ -52,6 +57,27 @@ public class SQLEntityInstance<T> {
         }
         table.setTableSettings("ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
         table.build().execute();
+
+        Set<String> columns = sqlManager.fetchTableMetadata(metaData.getTableName()).listColumns().get();
+        List<SQLEntityFieldMetaData<T>> notFound = metaData.getFields()
+                .stream()
+                .filter(e -> !columns.contains(e.getFieldName()))
+                .collect(Collectors.toList());
+        if (!notFound.isEmpty()) {
+            TableAlterBuilder tableAlter = sqlManager.alterTable(metaData.getTableName());
+            for (SQLEntityFieldMetaData<T> field : notFound) {
+                if (field.isAutoIncrement()) {
+                    tableAlter.addAutoIncrementColumn(field.getFieldName(), NumberType.INT).execute();
+                } else {
+                    tableAlter.addColumn(field.getFieldName(), field.getSqlType().toSQLString()).execute();
+                }
+            }
+            if (alterList.size() == 1 && notFound.stream().anyMatch(e -> e.getFieldName().equals(alterList.get(0)))) {
+                tableAlter.addIndex(IndexType.PRIMARY_KEY, null, alterList.remove(0)).execute();
+            } else if (alterList.size() >= 2 && notFound.stream().anyMatch(e -> e.getFieldName().equals(alterList.get(0)))) {
+                tableAlter.addIndex(IndexType.PRIMARY_KEY, null, alterList.remove(0), alterList.toArray(new String[0])).execute();
+            }
+        }
     }
 
     @SneakyThrows
