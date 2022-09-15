@@ -4,11 +4,13 @@ import cn.hutool.core.convert.BasicType;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.convert.impl.CollectionConverter;
 import cn.hutool.core.convert.impl.MapConverter;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ClassUtil;
 import lombok.SneakyThrows;
 import me.huanmeng.util.sql.entity.SQLEntityFieldMetaData;
 
+import java.io.InputStream;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.*;
@@ -134,6 +136,21 @@ public class SQLTypeUtils {
         SQLTypeUtils.registerSQLType(Timestamp.class, new SQLType("DATETIME"), (rs, name) -> {
             try {
                 return rs.getTimestamp(name);
+            } catch (Exception e) {
+                return null;
+            }
+        });
+        SQLTypeUtils.registerSQLType(byte[].class, new SQLType("BLOB"), (rs, name) -> {
+            try {
+                InputStream binaryStream = rs.getBinaryStream(name);
+                return IoUtil.readBytes(binaryStream);
+            } catch (Exception e) {
+                return null;
+            }
+        });
+        SQLTypeUtils.registerSQLType(InputStream.class, new SQLType("BLOB"), (rs, name) -> {
+            try {
+                return rs.getBinaryStream(name);
             } catch (Exception e) {
                 return null;
             }

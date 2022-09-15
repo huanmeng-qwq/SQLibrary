@@ -99,6 +99,9 @@ public class SQLEntityFieldMetaData<T> {
         if (o instanceof Collection) {
             o = o.toString();
         } else if (ArrayUtil.isArray(o)) {
+            if (o instanceof byte[]) {
+                return o;
+            }
             return ArrayUtil.toString(o);
         }
         return o;
