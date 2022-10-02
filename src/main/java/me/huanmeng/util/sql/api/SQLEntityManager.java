@@ -1,8 +1,8 @@
-package me.huanmeng.util.sql.manager;
+package me.huanmeng.util.sql.api;
 
 import cc.carm.lib.easysql.api.SQLManager;
-import me.huanmeng.util.sql.entity.SQLEntityInstance;
-import me.huanmeng.util.sql.entity.SQLOrderData;
+import me.huanmeng.util.sql.impl.SQLEntityInstance;
+import me.huanmeng.util.sql.impl.SQLOrderData;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -58,7 +58,8 @@ public interface SQLEntityManager<T> {
      *
      * @param limit     条数
      * @param orderData 排序 可选
-     * @param values    条件 包括自增id的诗句
+     * @param values    条件
+     * @apiNote 条件数组是
      */
     List<T> selectAny(int limit, @Nullable SQLOrderData orderData, Object... values);
 

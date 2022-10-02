@@ -10,6 +10,8 @@
 
 ```java
 
+import me.huanmeng.util.sql.api.annotation.SQLIgnore;
+
 @AllArgsConstructor
 @Getter
 @Setter
@@ -26,9 +28,9 @@ public class UserData {
     /**
      * 如果存在setId这个方法则自动调用
      * 如不存在直接setField
-     * 不想被调用该方法可以加上{@link me.huanmeng.util.sql.annotation.SQLIgnore}
+     * 不想被调用该方法可以加上{@link SQLIgnore}
      * @param id 主键id
-     * @see me.huanmeng.util.sql.annotation.SQLIgnore
+     * @see SQLIgnore
      */
     public void setId(int id) {
         this.id = id;

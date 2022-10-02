@@ -1,17 +1,18 @@
-package me.huanmeng.util.sql.entity;
+package me.huanmeng.util.sql.impl;
 
 import cc.carm.lib.easysql.api.SQLManager;
 import cc.carm.lib.easysql.api.builder.TableAlterBuilder;
 import cc.carm.lib.easysql.api.builder.TableCreateBuilder;
 import cc.carm.lib.easysql.api.enums.IndexType;
 import cc.carm.lib.easysql.api.enums.NumberType;
-import lombok.Getter;
-import lombok.SneakyThrows;
+import me.huanmeng.util.sql.api.SQLibrary;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 /**
@@ -20,33 +21,33 @@ import java.util.stream.Collectors;
  *
  * @author huanmeng_qwq
  */
-@Getter
 public class SQLEntityInstance<T> {
+    private final SQLibrary sqlibrary;
     private final Class<T> clazz;
     private final SQLEntityMetaData<T> metaData;
     private final SQLManager sqlManager;
     private final SQLEntityManagerImpl<T> sqlEntityManager;
 
-    public SQLEntityInstance(Class<T> clazz, SQLManager sqlManager) {
+    public SQLEntityInstance(SQLibrary sqlibrary, Class<T> clazz, SQLManager sqlManager) throws SQLException {
+        this.sqlibrary = sqlibrary;
         this.clazz = clazz;
-        this.metaData = new SQLEntityMetaData<>(clazz);
+        this.metaData = new SQLEntityMetaData<>(sqlibrary, clazz);
         this.sqlManager = sqlManager;
         createTable();
         this.sqlEntityManager = new SQLEntityManagerImpl<>(this);
     }
 
-    @SneakyThrows
-    public void createTable() {
-        final TableCreateBuilder table = sqlManager.createTable(metaData.getTableName());
+    public void createTable() throws SQLException {
+        final TableCreateBuilder table = sqlManager.createTable(metaData.tableName());
         List<String> keys = new ArrayList<>();
         for (SQLEntityFieldMetaData<T> field : metaData.getFields()) {
-            if (field.isKey()) {
-                keys.add(field.getFieldName());
+            if (field.key()) {
+                keys.add(field.fieldName());
             }
-            if (field.isAutoIncrement()) {
-                table.addAutoIncrementColumn(field.getFieldName(), false);
+            if (field.autoIncrement()) {
+                table.addAutoIncrementColumn(field.fieldName(), false);
             } else {
-                table.addColumn(field.getFieldName(), field.getSqlType().toSQLString());
+                table.addColumn(field.fieldName(), field.sqlType().toSQLString());
             }
         }
         ArrayList<String> alterList = new ArrayList<>(keys);
@@ -58,40 +59,47 @@ public class SQLEntityInstance<T> {
         table.setTableSettings("ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
         table.build().execute();
 
-        Set<String> columns = sqlManager.fetchTableMetadata(metaData.getTableName()).listColumns().get();
+        Set<String> columns;
+        try {
+            columns = sqlManager.fetchTableMetadata(metaData.tableName()).listColumns().get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
         List<SQLEntityFieldMetaData<T>> notFound = metaData.getFields()
                 .stream()
-                .filter(e -> !columns.contains(e.getFieldName()))
+                .filter(e -> !columns.contains(e.fieldName()))
                 .collect(Collectors.toList());
         if (!notFound.isEmpty()) {
-            TableAlterBuilder tableAlter = sqlManager.alterTable(metaData.getTableName());
+            TableAlterBuilder tableAlter = sqlManager.alterTable(metaData.tableName());
             for (SQLEntityFieldMetaData<T> field : notFound) {
-                if (field.isAutoIncrement()) {
-                    tableAlter.addAutoIncrementColumn(field.getFieldName(), NumberType.INT).execute();
+                if (field.autoIncrement()) {
+                    tableAlter.addAutoIncrementColumn(field.fieldName(), NumberType.INT).execute();
                 } else {
-                    tableAlter.addColumn(field.getFieldName(), field.getSqlType().toSQLString()).execute();
+                    tableAlter.addColumn(field.fieldName(), field.sqlType().toSQLString()).execute();
                 }
             }
-            if (alterList.size() == 1 && notFound.stream().anyMatch(e -> e.getFieldName().equals(alterList.get(0)))) {
+            if (alterList.size() == 1 && notFound.stream().anyMatch(e -> e.fieldName().equals(alterList.get(0)))) {
                 tableAlter.addIndex(IndexType.PRIMARY_KEY, null, alterList.remove(0)).execute();
-            } else if (alterList.size() >= 2 && notFound.stream().anyMatch(e -> e.getFieldName().equals(alterList.get(0)))) {
+            } else if (alterList.size() >= 2 && notFound.stream().anyMatch(e -> e.fieldName().equals(alterList.get(0)))) {
                 tableAlter.addIndex(IndexType.PRIMARY_KEY, null, alterList.remove(0), alterList.toArray(new String[0])).execute();
             }
         }
     }
 
-    @SneakyThrows
     public T transform(ResultSet rs) {
         final T instance = newInstance();
-        for (SQLEntityFieldMetaData<T> field : getMetaData().getFields()) {
-            field.getSqlType().transform(field).apply(rs, instance);
+        for (SQLEntityFieldMetaData<T> field : metaData().getFields()) {
+            field.sqlType().transform(rs, field, instance);
         }
         return instance;
     }
 
-    @SneakyThrows
     public T newInstance() {
-        return clazz.newInstance();
+        try {
+            return clazz.newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public String[] getKeyNames() {
@@ -101,8 +109,8 @@ public class SQLEntityInstance<T> {
     public String[] getKeyNames(boolean all) {
         final ArrayList<String> list = new ArrayList<>();
         for (SQLEntityFieldMetaData<T> field : metaData.getFields()) {
-            if (field.isKey() && (!field.isAutoIncrement() || all)) {
-                list.add(field.getFieldName());
+            if (field.key() && (!field.autoIncrement() || all)) {
+                list.add(field.fieldName());
             }
         }
         return list.toArray(new String[0]);
@@ -111,8 +119,8 @@ public class SQLEntityInstance<T> {
     public Object[] getKeyValues(T entity) {
         final ArrayList<Object> list = new ArrayList<>();
         for (SQLEntityFieldMetaData<T> field : metaData.getFields()) {
-            if (field.isKey() && !field.isAutoIncrement()) {
-                list.add(field.getValue(entity));
+            if (field.key() && !field.autoIncrement()) {
+                list.add(field.getEntityValue(entity));
             }
         }
         return list.toArray(new Object[0]);
@@ -121,18 +129,18 @@ public class SQLEntityInstance<T> {
     public Object[] getKeyValues(T entity, boolean all) {
         final ArrayList<Object> list = new ArrayList<>();
         for (SQLEntityFieldMetaData<T> field : metaData.getFields()) {
-            if (field.isKey() && (all || !field.isAutoIncrement())) {
-                list.add(field.getValue(entity));
+            if (field.key() && (all || !field.autoIncrement())) {
+                list.add(field.getEntityValue(entity));
             }
         }
         return list.toArray(new Object[0]);
     }
 
-    public String[] getFieldNames() {
+    public String[] fieldNames() {
         final ArrayList<String> list = new ArrayList<>();
         for (SQLEntityFieldMetaData<T> field : metaData.getFields()) {
-            if (!field.isKey() && !field.isAutoIncrement()) {
-                list.add(field.getFieldName());
+            if (!field.key() && !field.autoIncrement()) {
+                list.add(field.fieldName());
             }
         }
         return list.toArray(new String[0]);
@@ -141,8 +149,8 @@ public class SQLEntityInstance<T> {
     public Object[] getFieldValues(T entity) {
         final ArrayList<Object> list = new ArrayList<>();
         for (SQLEntityFieldMetaData<T> field : metaData.getFields()) {
-            if (!field.isKey() && !field.isAutoIncrement()) {
-                list.add(field.getValue(entity));
+            if (!field.key() && !field.autoIncrement()) {
+                list.add(field.getEntityValue(entity));
             }
         }
         return list.toArray(new Object[0]);
@@ -151,8 +159,8 @@ public class SQLEntityInstance<T> {
     public String[] getNames(boolean all) {
         final ArrayList<String> list = new ArrayList<>();
         for (SQLEntityFieldMetaData<T> field : metaData.getFields()) {
-            if (!field.isAutoIncrement() || all) {
-                list.add(field.getFieldName());
+            if (!field.autoIncrement() || all) {
+                list.add(field.fieldName());
             }
         }
         return list.toArray(new String[0]);
@@ -169,10 +177,22 @@ public class SQLEntityInstance<T> {
     public Object[] getValues(T entity, boolean all) {
         final ArrayList<Object> list = new ArrayList<>();
         for (SQLEntityFieldMetaData<T> field : metaData.getFields()) {
-            if (!field.isAutoIncrement() || all) {
-                list.add(field.getValue(entity));
+            if (!field.autoIncrement() || all) {
+                list.add(field.getEntityValue(entity));
             }
         }
         return list.toArray(new Object[0]);
+    }
+
+    public SQLManager sqlManager() {
+        return sqlManager;
+    }
+
+    public SQLEntityManagerImpl<T> sqlEntityManager() {
+        return sqlEntityManager;
+    }
+
+    public SQLEntityMetaData<T> metaData() {
+        return metaData;
     }
 }

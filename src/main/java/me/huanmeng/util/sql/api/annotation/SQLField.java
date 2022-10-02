@@ -1,4 +1,4 @@
-package me.huanmeng.util.sql.annotation;
+package me.huanmeng.util.sql.api.annotation;
 
 import java.lang.annotation.*;
 
@@ -23,7 +23,7 @@ public @interface SQLField {
     boolean id() default false;
 
     /**
-     * 自增
+     * 自增id
      */
     boolean isAutoIncrement() default false;
 

@@ -1,4 +1,4 @@
-package me.huanmeng.util.sql.annotation;
+package me.huanmeng.util.sql.api.annotation;
 
 import java.lang.annotation.*;
 
