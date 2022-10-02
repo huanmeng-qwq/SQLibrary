@@ -6,6 +6,7 @@ import cc.carm.lib.easysql.api.builder.TableCreateBuilder;
 import cc.carm.lib.easysql.api.enums.IndexType;
 import cc.carm.lib.easysql.api.enums.NumberType;
 import me.huanmeng.util.sql.api.SQLibrary;
+import me.huanmeng.util.sql.util.ReflectUtil;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -22,14 +23,12 @@ import java.util.stream.Collectors;
  * @author huanmeng_qwq
  */
 public class SQLEntityInstance<T> {
-    private final SQLibrary sqlibrary;
     private final Class<T> clazz;
     private final SQLEntityMetaData<T> metaData;
     private final SQLManager sqlManager;
     private final SQLEntityManagerImpl<T> sqlEntityManager;
 
     public SQLEntityInstance(SQLibrary sqlibrary, Class<T> clazz, SQLManager sqlManager) throws SQLException {
-        this.sqlibrary = sqlibrary;
         this.clazz = clazz;
         this.metaData = new SQLEntityMetaData<>(sqlibrary, clazz);
         this.sqlManager = sqlManager;
@@ -40,7 +39,7 @@ public class SQLEntityInstance<T> {
     public void createTable() throws SQLException {
         final TableCreateBuilder table = sqlManager.createTable(metaData.tableName());
         List<String> keys = new ArrayList<>();
-        for (SQLEntityFieldMetaData<T> field : metaData.getFields()) {
+        for (SQLEntityFieldMetaData<T> field : metaData.fields()) {
             if (field.key()) {
                 keys.add(field.fieldName());
             }
@@ -65,7 +64,7 @@ public class SQLEntityInstance<T> {
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
-        List<SQLEntityFieldMetaData<T>> notFound = metaData.getFields()
+        List<SQLEntityFieldMetaData<T>> notFound = metaData.fields()
                 .stream()
                 .filter(e -> !columns.contains(e.fieldName()))
                 .collect(Collectors.toList());
@@ -88,27 +87,23 @@ public class SQLEntityInstance<T> {
 
     public T transform(ResultSet rs) {
         final T instance = newInstance();
-        for (SQLEntityFieldMetaData<T> field : metaData().getFields()) {
+        for (SQLEntityFieldMetaData<T> field : metaData().fields()) {
             field.sqlType().transform(rs, field, instance);
         }
         return instance;
     }
 
     public T newInstance() {
-        try {
-            return clazz.newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
+        return ReflectUtil.newInstanceIfPossible(clazz);
     }
 
-    public String[] getKeyNames() {
-        return getKeyNames(false);
+    public String[] keyNames() {
+        return keyNames(false);
     }
 
-    public String[] getKeyNames(boolean all) {
+    public String[] keyNames(boolean all) {
         final ArrayList<String> list = new ArrayList<>();
-        for (SQLEntityFieldMetaData<T> field : metaData.getFields()) {
+        for (SQLEntityFieldMetaData<T> field : metaData.fields()) {
             if (field.key() && (!field.autoIncrement() || all)) {
                 list.add(field.fieldName());
             }
@@ -116,9 +111,9 @@ public class SQLEntityInstance<T> {
         return list.toArray(new String[0]);
     }
 
-    public Object[] getKeyValues(T entity) {
+    public Object[] keyValues(T entity) {
         final ArrayList<Object> list = new ArrayList<>();
-        for (SQLEntityFieldMetaData<T> field : metaData.getFields()) {
+        for (SQLEntityFieldMetaData<T> field : metaData.fields()) {
             if (field.key() && !field.autoIncrement()) {
                 list.add(field.getEntityValue(entity));
             }
@@ -126,9 +121,9 @@ public class SQLEntityInstance<T> {
         return list.toArray(new Object[0]);
     }
 
-    public Object[] getKeyValues(T entity, boolean all) {
+    public Object[] keyValues(T entity, boolean all) {
         final ArrayList<Object> list = new ArrayList<>();
-        for (SQLEntityFieldMetaData<T> field : metaData.getFields()) {
+        for (SQLEntityFieldMetaData<T> field : metaData.fields()) {
             if (field.key() && (all || !field.autoIncrement())) {
                 list.add(field.getEntityValue(entity));
             }
@@ -138,7 +133,7 @@ public class SQLEntityInstance<T> {
 
     public String[] fieldNames() {
         final ArrayList<String> list = new ArrayList<>();
-        for (SQLEntityFieldMetaData<T> field : metaData.getFields()) {
+        for (SQLEntityFieldMetaData<T> field : metaData.fields()) {
             if (!field.key() && !field.autoIncrement()) {
                 list.add(field.fieldName());
             }
@@ -146,9 +141,9 @@ public class SQLEntityInstance<T> {
         return list.toArray(new String[0]);
     }
 
-    public Object[] getFieldValues(T entity) {
+    public Object[] fieldValues(T entity) {
         final ArrayList<Object> list = new ArrayList<>();
-        for (SQLEntityFieldMetaData<T> field : metaData.getFields()) {
+        for (SQLEntityFieldMetaData<T> field : metaData.fields()) {
             if (!field.key() && !field.autoIncrement()) {
                 list.add(field.getEntityValue(entity));
             }
@@ -156,9 +151,9 @@ public class SQLEntityInstance<T> {
         return list.toArray(new Object[0]);
     }
 
-    public String[] getNames(boolean all) {
+    public String[] names(boolean all) {
         final ArrayList<String> list = new ArrayList<>();
-        for (SQLEntityFieldMetaData<T> field : metaData.getFields()) {
+        for (SQLEntityFieldMetaData<T> field : metaData.fields()) {
             if (!field.autoIncrement() || all) {
                 list.add(field.fieldName());
             }
@@ -166,17 +161,17 @@ public class SQLEntityInstance<T> {
         return list.toArray(new String[0]);
     }
 
-    public String[] getNames() {
-        return getNames(false);
+    public String[] names() {
+        return names(false);
     }
 
-    public Object[] getValues(T entity) {
-        return getValues(entity, false);
+    public Object[] values(T entity) {
+        return values(entity, false);
     }
 
-    public Object[] getValues(T entity, boolean all) {
+    public Object[] values(T entity, boolean all) {
         final ArrayList<Object> list = new ArrayList<>();
-        for (SQLEntityFieldMetaData<T> field : metaData.getFields()) {
+        for (SQLEntityFieldMetaData<T> field : metaData.fields()) {
             if (!field.autoIncrement() || all) {
                 list.add(field.getEntityValue(entity));
             }

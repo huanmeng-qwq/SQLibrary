@@ -3,13 +3,19 @@ package me.huanmeng.util.sql.impl;
 import cc.carm.lib.easysql.api.SQLAction;
 import cc.carm.lib.easysql.api.SQLManager;
 import cc.carm.lib.easysql.api.SQLQuery;
+import cc.carm.lib.easysql.api.builder.ConditionalBuilder;
+import cc.carm.lib.easysql.api.builder.DeleteBuilder;
 import cc.carm.lib.easysql.api.builder.TableQueryBuilder;
+import cc.carm.lib.easysql.api.builder.UpdateBuilder;
 import me.huanmeng.util.sql.api.SQLEntityManager;
 import me.huanmeng.util.sql.api.SQLQueryExecute;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.BiConsumer;
 
 /**
@@ -43,14 +49,22 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
                 .build().execute()) {
             ResultSet rs = query.getResultSet();
             if (rs.next()) {
-                T transform = holder.transform(rs);
-                query.close();
-                return transform;
+                return transform(rs);
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
         return null;
+    }
+
+    public T transform(ResultSet rs) {
+        return holder.transform(rs);
+    }
+
+    public void transformToList(List<T> list, ResultSet resultSet) throws SQLException {
+        while (resultSet.next()) {
+            list.add(holder.transform(resultSet));
+        }
     }
 
     @Override
@@ -63,15 +77,13 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
             builder.orderBy(holder.metaData().orderData().name(), holder.metaData().orderData().asc());
         }
         try (SQLQuery query = builder.build().execute()) {
-            ResultSet rs = query.getResultSet();
-            while (rs.next()) {
-                list.add(holder.transform(rs));
-            }
+            transformToList(list, query.getResultSet());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
         return list;
     }
+
 
     @Override
     public T selectFirst(Object... values) {
@@ -81,18 +93,15 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     public T selectFirst(boolean all, Object... values) {
         TableQueryBuilder tableQueryBuilder = holder.sqlManager().createQuery()
                 .inTable(holder.metaData().tableName()).setLimit(1);
-        tableQueryBuilder.addCondition(holder.getKeyNames(all), values);
+        fillCondition(tableQueryBuilder, all, values);
         SQLOrderData orderData = holder.metaData().orderData();
         if (orderData != null) {
             tableQueryBuilder.orderBy(orderData.name(), orderData.asc());
         }
         try (SQLQuery query = tableQueryBuilder.build().execute()) {
             if (query.getResultSet().next()) {
-                T transform = holder.transform(query.getResultSet());
-                query.close();
-                return transform;
+                return transform(query.getResultSet());
             }
-            query.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -108,14 +117,9 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
         if (orderData != null) {
             tableQueryBuilder.orderBy(orderData.name(), orderData.asc());
         }
-        ArrayList<T> ts;
-        try (SQLQuery query = tableQueryBuilder
-                .build().execute()) {
-            ResultSet resultSet = query.getResultSet();
-            ts = new ArrayList<>();
-            while (resultSet.next()) {
-                ts.add(holder.transform(resultSet));
-            }
+        ArrayList<T> ts = new ArrayList<>();
+        try (SQLQuery query = tableQueryBuilder.build().execute()) {
+            transformToList(ts, query.getResultSet());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -129,12 +133,10 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
         if (orderData != null) {
             tableQueryBuilder.orderBy(orderData.name(), orderData.asc());
         }
-        try (SQLQuery query = tableQueryBuilder
-                .build().execute()) {
+        fillCondition(tableQueryBuilder, true, values);
+        try (SQLQuery query = tableQueryBuilder.build().execute()) {
             if (query.getResultSet().next()) {
-                T transform = holder.transform(query.getResultSet());
-                query.close();
-                return transform;
+                return transform(query.getResultSet());
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -153,14 +155,9 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
         } else if (metaData.orderData() != null) {
             tableQueryBuilder.orderBy(metaData.orderData().name(), metaData.orderData().asc());
         }
-        ArrayList<T> ts;
-        try (SQLQuery query = tableQueryBuilder
-                .build().execute()) {
-            ResultSet resultSet = query.getResultSet();
-            ts = new ArrayList<>();
-            while (resultSet.next()) {
-                ts.add(holder.transform(resultSet));
-            }
+        ArrayList<T> ts = new ArrayList<>();
+        try (SQLQuery query = tableQueryBuilder.build().execute()) {
+            transformToList(ts, query.getResultSet());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -173,30 +170,16 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
         TableQueryBuilder tableQueryBuilder = holder.sqlManager().createQuery()
                 .inTable(metaData.tableName())
                 .setLimit(limit);
-        // 这里使用ArrayList再包装是因为Arrays#asList返回的List是无法修改的.
-        List<String> keys = new ArrayList<>(Arrays.asList(holder.getKeyNames(true)));
-        List<Object> objects = new ArrayList<>(Arrays.asList(values));
-        Map<String, Object> map = new LinkedHashMap<>();
-        for (int i = 0; i < objects.size(); i++) {
-            Object o = objects.get(i);
-            if (o != null) {
-                map.put(keys.get(i), o);
-            }
-        }
-
 
         if (orderData != null) {
             tableQueryBuilder.orderBy(orderData.name(), orderData.asc());
         } else if (metaData.orderData() != null) {
             tableQueryBuilder.orderBy(metaData.orderData().name(), metaData.orderData().asc());
         }
-        tableQueryBuilder.addCondition(map.keySet().toArray(new String[0]), map.values().toArray(new Object[0]));
+        fillCondition(tableQueryBuilder, true, values);
         ArrayList<T> ts = new ArrayList<>();
         try (SQLQuery query = tableQueryBuilder.build().execute()) {
-            ResultSet resultSet = query.getResultSet();
-            while (resultSet.next()) {
-                ts.add(holder.transform(resultSet));
-            }
+            transformToList(ts, query.getResultSet());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -206,21 +189,15 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     @Override
     public List<T> selectAll(Object... values) {
         TableQueryBuilder tableQueryBuilder = holder.sqlManager().createQuery()
-                .inTable(holder.metaData().tableName())
-                .addCondition(holder.getKeyNames(), values);
+                .inTable(holder.metaData().tableName());
+        fillCondition(tableQueryBuilder, false, values);
         SQLOrderData orderData = holder.metaData().orderData();
         if (orderData != null) {
             tableQueryBuilder.orderBy(orderData.name(), orderData.asc());
         }
-        ArrayList<T> ts;
-        try (SQLQuery query = tableQueryBuilder
-                .build()
-                .execute()) {
-            ResultSet resultSet = query.getResultSet();
-            ts = new ArrayList<>();
-            while (resultSet.next()) {
-                ts.add(holder.transform(resultSet));
-            }
+        ArrayList<T> ts = new ArrayList<>();
+        try (SQLQuery query = tableQueryBuilder.build().execute()) {
+            transformToList(ts, query.getResultSet());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -229,16 +206,12 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
 
     @Override
     public List<T> selectAll() {
-        ArrayList<T> ts;
+        ArrayList<T> ts = new ArrayList<>();
         try (SQLQuery query = holder.sqlManager().createQuery()
                 .inTable(holder.metaData().tableName())
                 .build()
                 .execute()) {
-            ResultSet resultSet = query.getResultSet();
-            ts = new ArrayList<>();
-            while (resultSet.next()) {
-                ts.add(holder.transform(resultSet));
-            }
+            transformToList(ts, query.getResultSet());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -248,12 +221,12 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     @Override
     public void update(T entity) {
         List<SQLEntityFieldMetaData<T>> list = holder.metaData().getAutoIncrementFields();
+        UpdateBuilder updateBuilder = holder.sqlManager().createUpdate(holder.metaData().tableName()).setLimit(1);
         if (list.size() == 1) {
             SQLEntityFieldMetaData<T> field = list.get(0);
-            SQLAction<Integer> sqlAction = holder.sqlManager().createUpdate(holder.metaData().tableName())
-                    .setLimit(1)
-                    .addCondition(field.fieldName(), field.getEntityValue(entity))
-                    .setColumnValues(holder.getNames(false), holder.getValues(entity, false))
+            updateBuilder.addCondition(field.fieldName(), field.getEntityValue(entity));
+            SQLAction<Integer> sqlAction = updateBuilder
+                    .setColumnValues(holder.names(false), holder.values(entity, false))
                     .build();
             try {
                 sqlAction.execute();
@@ -263,11 +236,8 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
             return;
         }
         try {
-            holder.sqlManager().createUpdate(holder.metaData().tableName())
-                    .setLimit(1)
-                    .addCondition(holder.getKeyNames(true), holder.getKeyValues(entity, true))
-                    .setColumnValues(holder.getNames(true), holder.getValues(entity, true))
-                    .build()
+            fillCondition(updateBuilder, true, holder.keyValues(entity, true));
+            updateBuilder.setColumnValues(holder.names(true), holder.values(entity, true)).build()
                     .execute();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -278,8 +248,8 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     public T insert(T entity) {
         try {
             holder.sqlManager().createInsert(holder.metaData().tableName())
-                    .setColumnNames(holder.getNames())
-                    .setParams(holder.getValues(entity))
+                    .setColumnNames(holder.names())
+                    .setParams(holder.values(entity))
                     .returnGeneratedKey()
                     .execute();
         } catch (SQLException e) {
@@ -296,11 +266,9 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
         try (SQLQuery query = holder.sqlManager().createQuery().withPreparedSQL("select LAST_INSERT_ID()").execute()) {
             ResultSet rs = query.getResultSet();
             if (rs.next()) {
-                int dbId = rs.getInt(1);
-                query.close();
+                long dbId = rs.getLong(1);
                 return selectFirst(new String[]{holder.metaData().getAutoIncrementFields().get(0).fieldName()}, dbId);
             }
-            query.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -318,27 +286,27 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
 
     @Override
     public boolean exist(T entity) {
-        boolean next;
-        try (SQLQuery query = holder.sqlManager().createQuery()
-                .inTable(holder.metaData().tableName())
-                .addCondition(holder.getKeyNames(), holder.getKeyValues(entity))
+        boolean exist;
+        TableQueryBuilder tableQueryBuilder = holder.sqlManager().createQuery()
+                .inTable(holder.metaData().tableName());
+        fillCondition(tableQueryBuilder, false, holder.values(entity));
+        try (SQLQuery query = tableQueryBuilder
                 .build()
                 .execute()) {
             ResultSet rs = query.getResultSet();
-            next = rs.next();
+            exist = rs.next();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return next;
+        return exist;
     }
 
     @Override
     public void delete(T entity) {
         try {
             holder.sqlManager().createDelete(holder.metaData().tableName())
-                    .addCondition(holder.getNames(false), holder.getValues(entity, false))
-                    .build()
-                    .execute();
+                    .addCondition(holder.names(false), holder.values(entity, false))
+                    .build().execute();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -346,7 +314,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
 
     @Override
     public T select(T userData) {
-        return selectFirst(true, holder.getKeyValues(userData, true));
+        return selectFirst(true, holder.keyValues(userData, true));
     }
 
     @Override
@@ -373,31 +341,28 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
 
 
     @Override
-    public void delete(Object... keys) {
+    public void delete(Object... values) {
         try {
-            holder.sqlManager().createDelete(holder.metaData().tableName())
-                    .addCondition(holder.getKeyNames(), keys)
-                    .build()
-                    .execute();
+            DeleteBuilder deleteBuilder = holder.sqlManager().createDelete(holder.metaData().tableName());
+            fillCondition(deleteBuilder, false, values);
+            deleteBuilder.build().execute();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public boolean exist(Object... keys) {
-        boolean next;
-        try (SQLQuery query = holder.sqlManager().createQuery()
-                .inTable(holder.metaData().tableName())
-                .addCondition(holder.getKeyNames(), keys)
-                .build()
-                .execute();) {
-
-            next = query.getResultSet().next();
+    public boolean exist(Object... values) {
+        boolean exist;
+        TableQueryBuilder tableQueryBuilder = holder.sqlManager().createQuery()
+                .inTable(holder.metaData().tableName());
+        fillCondition(tableQueryBuilder, false, values);
+        try (SQLQuery query = tableQueryBuilder.build().execute()) {
+            exist = query.getResultSet().next();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return next;
+        return exist;
     }
 
 
@@ -405,5 +370,17 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
         if (async) {
             query.executeAsync();
         }
+    }
+
+    protected void fillCondition(ConditionalBuilder<?, ?> conditionalBuilder, boolean all, Object... values) {
+        Map<String, Object> map = new LinkedHashMap<>();
+        String[] keyNames = holder.keyNames(all);
+        for (int i = 0; i < keyNames.length; i++) {
+            if (i >= values.length) {
+                break;
+            }
+            map.put(keyNames[i], values[i]);
+        }
+        conditionalBuilder.addCondition(map.keySet().toArray(new String[0]), map.values().toArray());
     }
 }

@@ -19,7 +19,7 @@ public interface SQLEntityManager<T> {
      * 查询1个实体
      *
      * @param values 条件
-     * @see SQLEntityInstance#getKeyNames()
+     * @see SQLEntityInstance#keyNames()
      * @see #selectFirst(Object...)
      * @deprecated
      */
@@ -34,7 +34,7 @@ public interface SQLEntityManager<T> {
      * 查询1个实体
      *
      * @param values 条件
-     * @see SQLEntityInstance#getKeyNames()
+     * @see SQLEntityInstance#keyNames()
      */
     T selectFirst(Object... values);
 
@@ -84,7 +84,7 @@ public interface SQLEntityManager<T> {
     List<T> selectAll();
 
     /**
-     * 更新一条记录<p>
+     * 更新一条数据<p>
      * 前提是它已经存在
      *
      * @param entity 实例
@@ -92,35 +92,35 @@ public interface SQLEntityManager<T> {
     void update(T entity);
 
     /**
-     * 写入一条记录
+     * 写入一条数据
      *
      * @param entity 实例
      */
     T insert(T entity);
 
     /**
-     * 更新或写入一条记录
+     * 更新或写入一条数据
      *
      * @param entity 实例
      */
     T updateOrInsert(T entity);
 
     /**
-     * 是否存在这一条记录
+     * 是否存在这一条数据
      *
      * @param values 条件
      */
     boolean exist(Object... values);
 
     /**
-     * 是否存在这一天记录
+     * 是否存在这一条数据
      *
      * @param entity 实例
      */
     boolean exist(T entity);
 
     /**
-     * 删除一个记录
+     * 删除一个数据
      *
      * @param values 条件
      * @see #delete(T)
@@ -128,14 +128,14 @@ public interface SQLEntityManager<T> {
     void delete(Object... values);
 
     /**
-     * 删除一条记录
+     * 删除一条数据
      *
      * @param entity 实例
      */
     void delete(T entity);
 
     /**
-     * 查询一个纪律
+     * 查询一个数据
      *
      * @param entity 示例
      */

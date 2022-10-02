@@ -2,10 +2,7 @@ package me.huanmeng.util.sql.util;
 
 import me.huanmeng.util.sql.type.HutoolAdapter;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -511,4 +508,161 @@ public class ReflectUtil {
 
         return (T) method.invoke(ClassUtil.isStatic(method) ? null : obj, actualArgs);
     }
+
+    /**
+     * 实例化对象
+     *
+     * @param <T>    对象类型
+     * @param clazz  类
+     * @param params 构造函数参数
+     * @return 对象
+     */
+    public static <T> T newInstance(Class<T> clazz, Object... params) {
+        if (ArrayUtil.isEmpty(params)) {
+            final Constructor<T> constructor = getConstructor(clazz);
+            if (null == constructor) {
+                throw new RuntimeException(String.format("No constructor for [%s]", clazz));
+            }
+            try {
+                return constructor.newInstance();
+            } catch (Exception e) {
+                throw new RuntimeException(String.format("Instance class [%s] error!", clazz), e);
+            }
+        }
+
+        final Class<?>[] paramTypes = ClassUtil.getClasses(params);
+        final Constructor<T> constructor = getConstructor(clazz, paramTypes);
+        if (null == constructor) {
+            throw new RuntimeException(String.format("No Constructor matched for parameter types: [%s]", new Object[]{paramTypes}));
+        }
+        try {
+            return constructor.newInstance(params);
+        } catch (Exception e) {
+            throw new RuntimeException(String.format("Instance class [%s] error!", clazz), e);
+        }
+    }
+
+    /**
+     * 尝试遍历并调用此类的所有构造方法，直到构造成功并返回
+     * <p>
+     * 对于某些特殊的接口，按照其默认实现实例化，例如：
+     * <pre>
+     *     Map       -》 HashMap
+     *     Collction -》 ArrayList
+     *     List      -》 ArrayList
+     *     Set       -》 HashSet
+     * </pre>
+     *
+     * @param <T>  对象类型
+     * @param type 被构造的类
+     * @return 构造后的对象，构造失败返回{@code null}
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T newInstanceIfPossible(Class<T> type) {
+        if (type == null) {
+            throw new NullPointerException("type");
+        }
+
+        // 原始类型
+        if (type.isPrimitive()) {
+            return (T) ClassUtil.getPrimitiveDefaultValue(type);
+        }
+
+        // 某些特殊接口的实例化按照默认实现进行
+        if (type.isAssignableFrom(AbstractMap.class)) {
+            type = (Class<T>) HashMap.class;
+        } else if (type.isAssignableFrom(List.class)) {
+            type = (Class<T>) ArrayList.class;
+        } else if (type.isAssignableFrom(Set.class)) {
+            type = (Class<T>) HashSet.class;
+        }
+
+        try {
+            return newInstance(type);
+        } catch (Exception e) {
+            // ignore
+            // 默认构造不存在的情况下查找其它构造
+        }
+
+        // 枚举
+        if (type.isEnum()) {
+            return type.getEnumConstants()[0];
+        }
+
+        // 数组
+        if (type.isArray()) {
+            return (T) Array.newInstance(type.getComponentType(), 0);
+        }
+
+        final Constructor<T>[] constructors = getConstructors(type);
+        Class<?>[] parameterTypes;
+        for (Constructor<T> constructor : constructors) {
+            parameterTypes = constructor.getParameterTypes();
+            if (0 == parameterTypes.length) {
+                continue;
+            }
+            constructor.setAccessible(true);
+            try {
+                return constructor.newInstance(ClassUtil.getDefaultValues(parameterTypes));
+            } catch (Exception ignore) {
+                // 构造出错时继续尝试下一种构造方式
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 获得一个类中所有构造列表
+     *
+     * @param <T>       构造的对象类型
+     * @param beanClass 类，非{@code null}
+     * @return 字段列表
+     * @throws SecurityException 安全检查异常
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> Constructor<T>[] getConstructors(Class<T> beanClass) throws SecurityException {
+        if (beanClass == null) {
+            throw new NullPointerException("beanClass");
+        }
+        return (Constructor<T>[]) CONSTRUCTORS_CACHE.computeIfAbsent(beanClass, (e) -> getConstructorsDirectly(beanClass));
+    }
+
+    /**
+     * 获得一个类中所有构造列表，直接反射获取，无缓存
+     *
+     * @param beanClass 类
+     * @return 字段列表
+     * @throws SecurityException 安全检查异常
+     */
+    public static Constructor<?>[] getConstructorsDirectly(Class<?> beanClass) throws SecurityException {
+        return beanClass.getDeclaredConstructors();
+    }
+
+    /**
+     * 查找类中的指定参数的构造方法，如果找到构造方法，会自动设置可访问为true
+     *
+     * @param <T>            对象类型
+     * @param clazz          类
+     * @param parameterTypes 参数类型，只要任何一个参数是指定参数的父类或接口或相等即可，此参数可以不传
+     * @return 构造方法，如果未找到返回null
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> Constructor<T> getConstructor(Class<T> clazz, Class<?>... parameterTypes) {
+        if (null == clazz) {
+            return null;
+        }
+
+        final Constructor<?>[] constructors = getConstructors(clazz);
+        Class<?>[] pts;
+        for (Constructor<?> constructor : constructors) {
+            pts = constructor.getParameterTypes();
+            if (ClassUtil.isAllAssignableFrom(pts, parameterTypes)) {
+                // 构造可访问
+                constructor.setAccessible(true);
+                return (Constructor<T>) constructor;
+            }
+        }
+        return null;
+    }
+
 }

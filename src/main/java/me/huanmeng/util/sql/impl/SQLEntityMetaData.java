@@ -53,20 +53,16 @@ public class SQLEntityMetaData<T> {
         return fields.stream().filter(e -> e.fieldName().equals(name)).findFirst().orElse(null);
     }
 
-    public List<SQLEntityFieldMetaData<T>> getFields() {
+    public List<SQLEntityFieldMetaData<T>> fields() {
         return Collections.unmodifiableList(fields);
     }
 
     public List<SQLEntityFieldMetaData<T>> getAutoIncrementFields() {
-        return getFields().stream().filter(SQLEntityFieldMetaData::autoIncrement).collect(Collectors.toList());
+        return fields().stream().filter(SQLEntityFieldMetaData::autoIncrement).collect(Collectors.toList());
     }
 
     public String tableName() {
         return tableName;
-    }
-
-    public List<SQLEntityFieldMetaData<T>> fields() {
-        return fields;
     }
 
     public SQLOrderData orderData() {

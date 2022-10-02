@@ -142,4 +142,39 @@ public class ClassUtil {
         }
         return Modifier.isStatic(method.getModifiers());
     }
+
+    /**
+     * 获得默认值列表
+     *
+     * @param classes 值类型
+     * @return 默认值列表
+     * @since 3.0.9
+     */
+    public static Object[] getDefaultValues(Class<?>... classes) {
+        final Object[] values = new Object[classes.length];
+        for (int i = 0; i < classes.length; i++) {
+            values[i] = getDefaultValue(classes[i]);
+        }
+        return values;
+    }
+
+    /**
+     * 获得对象数组的类数组
+     *
+     * @param objects 对象数组，如果数组中存在{@code null}元素，则此元素被认为是Object类型
+     * @return 类数组
+     */
+    public static Class<?>[] getClasses(Object... objects) {
+        Class<?>[] classes = new Class<?>[objects.length];
+        Object obj;
+        for (int i = 0; i < objects.length; i++) {
+            obj = objects[i];
+            if (null == obj) {
+                classes[i] = Object.class;
+            } else {
+                classes[i] = obj.getClass();
+            }
+        }
+        return classes;
+    }
 }
