@@ -1,4 +1,4 @@
-package me.huanmeng.util.sql.impl;
+package me.huanmeng.util.sql.api;
 
 /**
  * 2022/2/4<br>

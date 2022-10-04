@@ -2,7 +2,6 @@ package me.huanmeng.util.sql.api;
 
 import cc.carm.lib.easysql.api.SQLManager;
 import me.huanmeng.util.sql.impl.SQLEntityInstance;
-import me.huanmeng.util.sql.impl.SQLOrderData;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;

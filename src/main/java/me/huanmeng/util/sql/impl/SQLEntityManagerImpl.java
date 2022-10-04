@@ -8,6 +8,7 @@ import cc.carm.lib.easysql.api.builder.DeleteBuilder;
 import cc.carm.lib.easysql.api.builder.TableQueryBuilder;
 import cc.carm.lib.easysql.api.builder.UpdateBuilder;
 import me.huanmeng.util.sql.api.SQLEntityManager;
+import me.huanmeng.util.sql.api.SQLOrderData;
 import me.huanmeng.util.sql.api.SQLQueryExecute;
 
 import java.sql.ResultSet;
