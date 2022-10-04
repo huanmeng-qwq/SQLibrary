@@ -71,6 +71,10 @@ public class SQLibrary {
         return dataSource;
     }
 
+    public SQLTypes sqlTypes() {
+        return sqlTypes;
+    }
+
     public SQLType typeByClass(Class<?> type) {
         return sqlTypes.getSQLType(type);
     }
