@@ -1,5 +1,7 @@
 package me.huanmeng.util.sql.api.annotation;
 
+import me.huanmeng.util.sql.impl.SQLEntityFieldMetaData;
+
 import java.lang.annotation.*;
 
 /**
@@ -39,9 +41,40 @@ public @interface SQLField {
      */
     Order orderBy() default Order.NONE;
 
+    /**
+     * 序列化
+     *
+     * @return
+     */
+    Serialize serialize() default Serialize.NONE;
+
     public static enum Order {
         NONE,
         ASC,
         DESC
+    }
+
+    enum Serialize {
+        NONE,
+        TO_STRING() {
+            @Override
+            public Object transform(SQLEntityFieldMetaData<?> fieldMetaData, Object o) {
+                if (o == null) {
+                    return null;
+                }
+                return o.toString();
+            }
+        },
+        JSON() {
+            @Override
+            public Object transform(SQLEntityFieldMetaData<?> fieldMetaData, Object o) {
+                return fieldMetaData.sqlibrary().gson().toJson(o);
+            }
+        },
+        ;
+
+        public Object transform(SQLEntityFieldMetaData<?> fieldMetaData, Object o) {
+            return o;
+        }
     }
 }

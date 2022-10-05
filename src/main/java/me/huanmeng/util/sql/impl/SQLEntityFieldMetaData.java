@@ -36,6 +36,7 @@ public class SQLEntityFieldMetaData<T> {
     private boolean autoIncrement;
     private SQLField.Order order = SQLField.Order.NONE;
     private String simpleName;
+    private SQLField.Serialize serialize = SQLField.Serialize.NONE;
 
     public SQLEntityFieldMetaData(SQLibrary sqlibrary, Field field) {
         this.sqlibrary = sqlibrary;
@@ -70,6 +71,7 @@ public class SQLEntityFieldMetaData<T> {
                         }
                     }
                     this.autoIncrement = f.isAutoIncrement();
+                    this.serialize = f.serialize();
                     return f;
                 }).orElseGet(() -> {
                     this.fieldName = field.getName();
@@ -99,7 +101,7 @@ public class SQLEntityFieldMetaData<T> {
 
     public Object getEntityValue(T entity) {
         try {
-            Object o = field.get(entity);
+            Object o = serialize.transform(this, field.get(entity));
             if (o instanceof Collection) {
                 o = o.toString();
             } else if (ArrayUtil.isArray(o)) {
@@ -144,5 +146,9 @@ public class SQLEntityFieldMetaData<T> {
 
     public Class<?> componentType() {
         return componentType;
+    }
+
+    public SQLibrary sqlibrary() {
+        return sqlibrary;
     }
 }
