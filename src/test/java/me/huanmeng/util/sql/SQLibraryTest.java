@@ -4,11 +4,8 @@ import cc.carm.lib.easysql.beecp.BeeDataSource;
 import me.huanmeng.util.sql.api.SQLAsyncEntityManager;
 import me.huanmeng.util.sql.api.SQLEntityManager;
 import me.huanmeng.util.sql.api.SQLibrary;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 /**
  * 2022/10/2<br>

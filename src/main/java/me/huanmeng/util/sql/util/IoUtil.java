@@ -32,7 +32,7 @@ public class IoUtil {
      * @return bytes
      */
     public static byte[] readBytes(InputStream inputStream, boolean close) {
-        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();) {
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             int read;
             while ((read = inputStream.read()) != -1) {
                 outputStream.write(read);

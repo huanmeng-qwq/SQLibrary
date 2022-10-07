@@ -7,10 +7,10 @@ package me.huanmeng.util.sql.util;
  * @author huanmeng_qwq
  */
 public class NumberUtil {
-    private NumberUtil(){
+    private NumberUtil() {
     }
 
-    public static boolean isInt(String s){
+    public static boolean isInt(String s) {
         try {
             Integer.parseInt(s);
         } catch (NumberFormatException e) {

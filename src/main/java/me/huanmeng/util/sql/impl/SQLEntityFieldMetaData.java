@@ -1,6 +1,5 @@
 package me.huanmeng.util.sql.impl;
 
-import cc.carm.lib.easysql.api.SQLManager;
 import me.huanmeng.util.sql.api.SQLibrary;
 import me.huanmeng.util.sql.api.annotation.SQLField;
 import me.huanmeng.util.sql.api.annotation.SQLIgnore;
@@ -9,13 +8,11 @@ import me.huanmeng.util.sql.type.SQLType;
 import me.huanmeng.util.sql.util.ArrayUtil;
 import me.huanmeng.util.sql.util.NumberUtil;
 import me.huanmeng.util.sql.util.ReflectUtil;
-import me.huanmeng.util.sql.util.VersionUtil;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.logging.Logger;
 
 /**
  * 2022/1/29<br>

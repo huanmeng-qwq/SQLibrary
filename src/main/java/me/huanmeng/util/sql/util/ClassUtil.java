@@ -68,7 +68,7 @@ public class ClassUtil {
                 if (BasicType.unWrap(type1) != BasicType.unWrap(type2)) {
                     return false;
                 }
-            } else if (false == type1.isAssignableFrom(type2)) {
+            } else if (!type1.isAssignableFrom(type2)) {
                 return false;
             }
         }
