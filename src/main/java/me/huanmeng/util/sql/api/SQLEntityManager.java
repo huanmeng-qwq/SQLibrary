@@ -147,6 +147,7 @@ public interface SQLEntityManager<T> {
      */
     void custom(BiConsumer<SQLManager, SQLEntityInstance<T>> run);
 
+    // Debug
     boolean toggleDebug();
 
     void setDebug(boolean debug);
