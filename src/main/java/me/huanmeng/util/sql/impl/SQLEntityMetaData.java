@@ -5,6 +5,9 @@ import me.huanmeng.util.sql.api.SQLibrary;
 import me.huanmeng.util.sql.api.annotation.SQLEntity;
 import me.huanmeng.util.sql.api.annotation.SQLField;
 import me.huanmeng.util.sql.util.NamingCase;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.util.Collections;
@@ -19,21 +22,25 @@ import java.util.stream.Collectors;
  *
  * @author huanmeng_qwq
  */
+@SuppressWarnings("unused")
 public class SQLEntityMetaData<T> {
     private final SQLibrary sqlibrary;
     private final Class<T> clazz;
     private String tableName;
-    private final List<SQLEntityFieldMetaData<T>> fields;
+    private final List<SQLEntityFieldMetaData<T, Object>> fields;
     private SQLOrderData orderData;
 
-    public SQLEntityMetaData(SQLibrary sqlibrary, Class<T> clazz) {
+    public SQLEntityMetaData(@NotNull SQLibrary sqlibrary, @NotNull Class<T> clazz) {
         this.sqlibrary = sqlibrary;
         this.clazz = clazz;
         this.fields = new CopyOnWriteArrayList<>();
         init();
     }
 
-    public void init() {
+    /**
+     * 初始化
+     */
+    protected void init() {
         tableName = NamingCase.toCamelCase(NamingCase.toUnderlineCase(clazz.getSimpleName()));
         Optional.ofNullable(clazz.getAnnotation(SQLEntity.class))
                 .ifPresent(e -> {
@@ -42,30 +49,45 @@ public class SQLEntityMetaData<T> {
                     }
                 });
         for (Field field : clazz.getDeclaredFields()) {
-            final SQLEntityFieldMetaData<T> fieldMetaData = new SQLEntityFieldMetaData<>(sqlibrary, field);
+            final SQLEntityFieldMetaData<T, Object> fieldMetaData = new SQLEntityFieldMetaData<>(sqlibrary, field);
             fields.add(fieldMetaData);
-            if (fieldMetaData.order() != SQLField.Order.NONE) {
+            if (orderData == null && fieldMetaData.order() != SQLField.Order.NONE) {
                 orderData = new SQLOrderData(fieldMetaData.fieldName(), fieldMetaData.order() == SQLField.Order.ASC);
             }
         }
     }
 
-    public SQLEntityFieldMetaData<T> getField(String name) {
+    @Nullable
+    public SQLEntityFieldMetaData<T, Object> getField(@NotNull String name) {
         return fields.stream().filter(e -> e.fieldName().equals(name)).findFirst().orElse(null);
     }
 
-    public List<SQLEntityFieldMetaData<T>> fields() {
+    @NotNull
+    public List<SQLEntityFieldMetaData<T, Object>> fields() {
         return Collections.unmodifiableList(fields);
     }
 
-    public List<SQLEntityFieldMetaData<T>> getAutoIncrementFields() {
+    @NotNull
+    public List<SQLEntityFieldMetaData<T, Object>> getAutoIncrementFields() {
         return fields().stream().filter(SQLEntityFieldMetaData::autoIncrement).collect(Collectors.toList());
     }
 
+    /**
+     * 要获取表明请使用{@link SQLEntityInstance#tableName()}
+     */
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval(inVersion = "2.5")
+    @NotNull
     public String tableName() {
         return tableName;
     }
 
+    @NotNull
+    protected String tableName0() {
+        return tableName;
+    }
+
+    @Nullable
     public SQLOrderData orderData() {
         return orderData;
     }

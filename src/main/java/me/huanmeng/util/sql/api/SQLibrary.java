@@ -26,8 +26,8 @@ import java.util.function.Supplier;
 public class SQLibrary {
     protected final Map<Class<?>, SQLEntityInstance<?>> INSTANCE_MAP = new ConcurrentHashMap<>();
 
-    protected final DataSource dataSource;
-    protected final SQLTypes sqlTypes;
+    protected DataSource dataSource;
+    protected SQLTypes sqlTypes;
     protected Gson gson;
 
     public SQLibrary(@NotNull DataSource dataSource) {
@@ -37,7 +37,7 @@ public class SQLibrary {
     }
 
     /**
-     * 获取{@link SQLEntityInstance}
+     * 获取{@link SQLEntityInstance<T>}
      *
      * @param clazz      对应类
      * @param sqlManager {@link SQLManager}
@@ -53,6 +53,11 @@ public class SQLibrary {
         });
     }
 
+    /**
+     * 获取{@link SQLEntityInstance<T>}
+     *
+     * @param clazz 对应类
+     */
     @NotNull
     public <T> SQLEntityInstance<T> instance(@NotNull Class<T> clazz) {
         return instanceOrCreate(clazz, createManager());
@@ -60,11 +65,21 @@ public class SQLibrary {
 
     // ***** Sync *****
 
+    /**
+     * 获取{@link SQLEntityManager<T>}
+     *
+     * @param clazz 对应类
+     */
     @NotNull
     public <T> SQLEntityManager<T> manager(@NotNull Class<T> clazz) {
         return manager(clazz, createManager());
     }
 
+    /**
+     * 获取{@link SQLEntityManager<T>}
+     *
+     * @param clazz 对应类
+     */
     @NotNull
     public <T> SQLEntityManager<T> manager(@NotNull Class<T> clazz, @NotNull Supplier<@NotNull SQLManager> sqlManager) {
         return instanceOrCreate(clazz, sqlManager).sqlEntityManager();
@@ -72,38 +87,62 @@ public class SQLibrary {
 
     // ***** Async *****
 
+    /**
+     * 获取{@link SQLAsyncEntityManager<T>}
+     *
+     * @param clazz 对应类
+     */
     @NotNull
-    public <T> SQLEntityManager<T> managerAsync(@NotNull Class<T> clazz) {
+    public <T> SQLAsyncEntityManager<T> managerAsync(@NotNull Class<T> clazz) {
         return manager(clazz).async();
     }
 
+    /**
+     * 获取{@link SQLAsyncEntityManager<T>}
+     *
+     * @param clazz 对应类
+     */
     @NotNull
     public <T> SQLAsyncEntityManager<T> managerAsync(@NotNull Class<T> clazz, @NotNull Supplier<@NotNull SQLManager> sqlManager) {
         return manager(clazz, sqlManager).async();
     }
 
+    // End
+
+    /**
+     * 创建{@link SQLManager}
+     */
     @NotNull
     public Supplier<@NotNull SQLManager> createManager() {
         return () -> new SQLManagerImpl(dataSource);
     }
 
+    /**
+     * 创建{@link SQLManager}
+     */
     @NotNull
     public Supplier<@NotNull SQLManager> createManager(@NotNull DataSource dataSource) {
         return () -> new SQLManagerImpl(dataSource);
     }
 
+    /**
+     * @return 数据源
+     */
     @NotNull
     public DataSource dataSource() {
         return dataSource;
     }
 
+    /**
+     * @return 解析集
+     */
     @NotNull
     public SQLTypes sqlTypes() {
         return sqlTypes;
     }
 
     @NotNull
-    public SQLType typeByClass(@NotNull Class<?> type) {
+    public <T> SQLType<T> typeByClass(@NotNull Class<?> type) {
         return sqlTypes.getSQLType(type);
     }
 
@@ -134,6 +173,16 @@ public class SQLibrary {
     @NotNull
     public SQLibrary gson(@NotNull Gson gson) {
         this.gson = gson;
+        return this;
+    }
+
+    public SQLibrary dataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
+        return this;
+    }
+
+    public SQLibrary sqlTypes(SQLTypes sqlTypes) {
+        this.sqlTypes = sqlTypes;
         return this;
     }
 }

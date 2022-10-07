@@ -43,11 +43,12 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     @Override
     public T selectFirst(String[] name, Object... values) {
         TableQueryBuilder builder = holder.sqlManager().createQuery()
-                .inTable(holder.metaData().tableName())
+                .inTable(holder.tableName())
                 .setLimit(1)
                 .addCondition(name, values);
-        if (holder.metaData().orderData() != null) {
-            builder.orderBy(holder.metaData().orderData().name(), holder.metaData().orderData().asc());
+        SQLOrderData sqlOrderData = holder.metaData().orderData();
+        if (sqlOrderData != null) {
+            builder.orderBy(sqlOrderData.name(), sqlOrderData.asc());
         }
         try (SQLQuery query = builder.build().execute()) {
             ResultSet rs = query.getResultSet();
@@ -60,7 +61,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
         return null;
     }
 
-    @NotNull
+    @Nullable
     public T transform(@NotNull ResultSet rs) {
         return holder.transform(rs);
     }
@@ -75,10 +76,11 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     public @NotNull List<T> selectAny(String[] name, Object... values) {
         List<T> list = new ArrayList<>();
         TableQueryBuilder builder = holder.sqlManager().createQuery()
-                .inTable(holder.metaData().tableName())
+                .inTable(holder.tableName())
                 .addCondition(name, values);
-        if (holder.metaData().orderData() != null) {
-            builder.orderBy(holder.metaData().orderData().name(), holder.metaData().orderData().asc());
+        SQLOrderData sqlOrderData = holder.metaData().orderData();
+        if (sqlOrderData != null) {
+            builder.orderBy(sqlOrderData.name(), sqlOrderData.asc());
         }
         try (SQLQuery query = builder.build().execute()) {
             transformToList(list, query.getResultSet());
@@ -96,7 +98,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
 
     public T selectFirst(boolean all, @NotNull Object... values) {
         TableQueryBuilder tableQueryBuilder = holder.sqlManager().createQuery()
-                .inTable(holder.metaData().tableName()).setLimit(1);
+                .inTable(holder.tableName()).setLimit(1);
         fillCondition(tableQueryBuilder, all, values);
         SQLOrderData orderData = holder.metaData().orderData();
         if (orderData != null) {
@@ -115,7 +117,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     @Override
     public @NotNull List<T> select(int limit) {
         TableQueryBuilder tableQueryBuilder = holder.sqlManager().createQuery()
-                .inTable(holder.metaData().tableName())
+                .inTable(holder.tableName())
                 .setLimit(limit);
         SQLOrderData orderData = holder.metaData().orderData();
         if (orderData != null) {
@@ -133,7 +135,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     @Override
     public @Nullable T select(SQLOrderData orderData, Object... values) {
         TableQueryBuilder tableQueryBuilder = holder.sqlManager().createQuery()
-                .inTable(holder.metaData().tableName());
+                .inTable(holder.tableName());
         if (orderData != null) {
             tableQueryBuilder.orderBy(orderData.name(), orderData.asc());
         }
@@ -152,12 +154,15 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     public @NotNull List<T> select(int limit, SQLOrderData orderData) {
         SQLEntityMetaData<T> metaData = holder.metaData();
         TableQueryBuilder tableQueryBuilder = holder.sqlManager().createQuery()
-                .inTable(metaData.tableName())
+                .inTable(holder.tableName())
                 .setLimit(limit);
         if (orderData != null) {
             tableQueryBuilder.orderBy(orderData.name(), orderData.asc());
-        } else if (metaData.orderData() != null) {
-            tableQueryBuilder.orderBy(metaData.orderData().name(), metaData.orderData().asc());
+        } else {
+            SQLOrderData sqlOrderData = metaData.orderData();
+            if (sqlOrderData != null) {
+                tableQueryBuilder.orderBy(sqlOrderData.name(), sqlOrderData.asc());
+            }
         }
         ArrayList<T> ts = new ArrayList<>();
         try (SQLQuery query = tableQueryBuilder.build().execute()) {
@@ -172,13 +177,16 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     public @NotNull List<T> selectAny(int limit, SQLOrderData orderData, @NotNull Object @NotNull ... values) {
         SQLEntityMetaData<T> metaData = holder.metaData();
         TableQueryBuilder tableQueryBuilder = holder.sqlManager().createQuery()
-                .inTable(metaData.tableName())
+                .inTable(holder.tableName())
                 .setLimit(limit);
 
         if (orderData != null) {
             tableQueryBuilder.orderBy(orderData.name(), orderData.asc());
-        } else if (metaData.orderData() != null) {
-            tableQueryBuilder.orderBy(metaData.orderData().name(), metaData.orderData().asc());
+        } else {
+            SQLOrderData sqlOrderData = metaData.orderData();
+            if (sqlOrderData != null) {
+                tableQueryBuilder.orderBy(sqlOrderData.name(), sqlOrderData.asc());
+            }
         }
         fillCondition(tableQueryBuilder, true, values);
         ArrayList<T> ts = new ArrayList<>();
@@ -193,7 +201,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     @Override
     public @NotNull List<T> selectAll(Object... values) {
         TableQueryBuilder tableQueryBuilder = holder.sqlManager().createQuery()
-                .inTable(holder.metaData().tableName());
+                .inTable(holder.tableName());
         fillCondition(tableQueryBuilder, false, values);
         SQLOrderData orderData = holder.metaData().orderData();
         if (orderData != null) {
@@ -212,7 +220,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     public @NotNull List<T> selectAll() {
         ArrayList<T> ts = new ArrayList<>();
         try (SQLQuery query = holder.sqlManager().createQuery()
-                .inTable(holder.metaData().tableName())
+                .inTable(holder.tableName())
                 .build()
                 .execute()) {
             transformToList(ts, query.getResultSet());
@@ -224,10 +232,10 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
 
     @Override
     public void update(@NotNull T entity) {
-        List<SQLEntityFieldMetaData<T>> list = holder.metaData().getAutoIncrementFields();
-        UpdateBuilder updateBuilder = holder.sqlManager().createUpdate(holder.metaData().tableName()).setLimit(1);
+        List<SQLEntityFieldMetaData<T, Object>> list = holder.metaData().getAutoIncrementFields();
+        UpdateBuilder updateBuilder = holder.sqlManager().createUpdate(holder.tableName()).setLimit(1);
         if (list.size() == 1) {
-            SQLEntityFieldMetaData<T> field = list.get(0);
+            SQLEntityFieldMetaData<T, Object> field = list.get(0);
             updateBuilder.addCondition(field.fieldName(), field.getEntityValue(entity));
             SQLAction<Integer> sqlAction = updateBuilder
                     .setColumnValues(holder.fieldNames(), holder.fieldValues(entity))
@@ -251,7 +259,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     @Override
     public @Nullable T insert(@NotNull T entity) {
         try {
-            holder.sqlManager().createInsert(holder.metaData().tableName())
+            holder.sqlManager().createInsert(holder.tableName())
                     .setColumnNames(holder.names())
                     .setParams(holder.values(entity))
                     .returnGeneratedKey()
@@ -292,7 +300,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     public boolean exist(@NotNull T entity) {
         boolean exist;
         TableQueryBuilder tableQueryBuilder = holder.sqlManager().createQuery()
-                .inTable(holder.metaData().tableName());
+                .inTable(holder.tableName());
         fillCondition(tableQueryBuilder, false, holder.values(entity));
         try (SQLQuery query = tableQueryBuilder
                 .build()
@@ -308,7 +316,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     @Override
     public void delete(@NotNull T entity) {
         try {
-            holder.sqlManager().createDelete(holder.metaData().tableName())
+            holder.sqlManager().createDelete(holder.tableName())
                     .addCondition(holder.names(false), holder.values(entity, false))
                     .build().execute();
         } catch (SQLException e) {
@@ -355,7 +363,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     @Override
     public void delete(@NotNull Object @NotNull ... values) {
         try {
-            DeleteBuilder deleteBuilder = holder.sqlManager().createDelete(holder.metaData().tableName());
+            DeleteBuilder deleteBuilder = holder.sqlManager().createDelete(holder.tableName());
             fillCondition(deleteBuilder, false, values);
             deleteBuilder.build().execute();
         } catch (SQLException e) {
@@ -367,7 +375,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     public boolean exist(@NotNull Object @NotNull ... values) {
         boolean exist;
         TableQueryBuilder tableQueryBuilder = holder.sqlManager().createQuery()
-                .inTable(holder.metaData().tableName());
+                .inTable(holder.tableName());
         fillCondition(tableQueryBuilder, false, values);
         try (SQLQuery query = tableQueryBuilder.build().execute()) {
             exist = query.getResultSet().next();

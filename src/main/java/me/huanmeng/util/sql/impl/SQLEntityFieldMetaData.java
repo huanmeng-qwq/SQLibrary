@@ -1,5 +1,6 @@
 package me.huanmeng.util.sql.impl;
 
+import me.huanmeng.util.sql.api.SQLTypeParser;
 import me.huanmeng.util.sql.api.SQLibrary;
 import me.huanmeng.util.sql.api.annotation.SQLField;
 import me.huanmeng.util.sql.api.annotation.SQLIgnore;
@@ -8,6 +9,10 @@ import me.huanmeng.util.sql.type.SQLType;
 import me.huanmeng.util.sql.util.ArrayUtil;
 import me.huanmeng.util.sql.util.NumberUtil;
 import me.huanmeng.util.sql.util.ReflectUtil;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -18,28 +23,51 @@ import java.util.Optional;
  * 2022/1/29<br>
  * SQLibrary<br>
  *
+ * @param <I> 类 class
+ * @param <T> 字段的类型 这里不明确 建议使用{@link Object}
  * @author huanmeng_qwq
  */
-public class SQLEntityFieldMetaData<T> {
-    private final SQLibrary sqlibrary;
-    private final Field field;
-    private String fieldName;
-    private boolean key;
-    private Class<?> type;
-    private Class<?> componentType;
-    private SQLType sqlType;
-    private boolean autoIncrement;
-    private SQLField.Order order = SQLField.Order.NONE;
-    private String simpleName;
-    private SQLField.Serialize serialize = SQLField.Serialize.NONE;
+@SuppressWarnings({"unused", "unchecked"})
+public class SQLEntityFieldMetaData<I, T> {
+    protected static Logger logger = LoggerFactory.getLogger("SQLFieldMetaData");
+    protected final SQLibrary sqlibrary;
+    protected final Field field;
+    protected String fieldName;
+    protected boolean key;
+    protected Class<?> type;
+    protected Class<?> componentType;
+    protected SQLType<T> sqlType;
+    protected boolean autoIncrement;
+    protected SQLField.Order order = SQLField.Order.NONE;
+    protected String simpleName;
+    protected SQLField.Serialize serialize = SQLField.Serialize.NONE;
+    public static final int MAX_KEY_LENGTH;
+    public static final int CHAR_BYTE;
 
-    public SQLEntityFieldMetaData(SQLibrary sqlibrary, Field field) {
+    static {
+        try {
+            MAX_KEY_LENGTH = Integer.parseInt(System.getProperty("sqlibrary.max-key-length", "767"));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        try {
+            CHAR_BYTE = Integer.parseInt(System.getProperty("sqlibrary.char-byte", "4"));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public SQLEntityFieldMetaData(@NotNull SQLibrary sqlibrary, @NotNull Field field) {
         this.sqlibrary = sqlibrary;
         this.field = field;
         init();
     }
 
-    private void init() {
+    /**
+     * 初始化
+     */
+    protected void init() {
         this.field.setAccessible(true);
         this.type = this.field.getType();
         this.componentType = this.field.getType().getComponentType();
@@ -55,15 +83,25 @@ public class SQLEntityFieldMetaData<T> {
                     this.order = f.orderBy();
                     this.key = f.id();
                     if (!f.sqlType().trim().isEmpty()) {
-                        final String[] split = f.sqlType().split(",");
+                        String[] split = f.sqlType().split(",");
                         for (int i = 0; i < split.length; i++) {
                             split[i] = split[i].trim();
                         }
                         if (split.length <= 1 && !split[0].isEmpty()) {
-                            this.sqlType = new SQLType(split[0]);
+                            this.sqlType = new SQLType<>(split[0]);
                         } else if (!split[1].isEmpty() && NumberUtil.isInt(split[1])) {
-                            this.sqlType = new SQLType(split[0], Integer.parseInt(split[1]));
+                            this.sqlType = new SQLType<>(split[0], Integer.parseInt(split[1]));
                         }
+                    }
+                    // 索引字段的长度不能是255
+                    /*
+                        1071 - Specified key was too long; max key length is 767 bytes
+                     */
+                    if (this.key && this.sqlType.length() * CHAR_BYTE >= MAX_KEY_LENGTH) {
+                        logger.warn("Errors will occur in {} and have been corrected automatically", sqlType.toSQLString());
+                        SQLTypeParser<T> sqlTypeParser = sqlType.typeParser();
+                        // def: 191=767/4
+                        sqlType = new SQLType<T>(sqlType.name(), Math.floorDiv(MAX_KEY_LENGTH, CHAR_BYTE)).typeParser(sqlTypeParser);
                     }
                     this.autoIncrement = f.isAutoIncrement();
                     this.serialize = f.serialize();
@@ -74,7 +112,13 @@ public class SQLEntityFieldMetaData<T> {
                 });
     }
 
-    public void setValue(T instance, Object obj) {
+    /**
+     * 设置实例的值
+     *
+     * @param instance 实例
+     * @param obj      值
+     */
+    public void setValue(@NotNull I instance, @Nullable T obj) {
         try {
             final Method method = ReflectUtil.getMethod(instance.getClass(), true, "set" + this.field.getName(), this.type());
             if (method != null) {
@@ -94,7 +138,12 @@ public class SQLEntityFieldMetaData<T> {
     }
 
 
-    public Object getEntityValue(T entity) {
+    /**
+     * @param entity 实例
+     * @return 该成员变量的值
+     * @see SQLField.Serialize
+     */
+    public Object getEntityValue(@NotNull I entity) {
         try {
             Object o = serialize.transform(this, field.get(entity));
             if (o instanceof Collection) {
@@ -111,38 +160,72 @@ public class SQLEntityFieldMetaData<T> {
         }
     }
 
+    /**
+     * @return {@link Field}
+     */
+    @NotNull
     public Field field() {
         return field;
     }
 
+    /**
+     * @return 字段名称
+     * @see Field#getName()
+     * @see SQLField#value()
+     */
+    @NotNull
     public String fieldName() {
         return fieldName;
     }
 
+    /**
+     * @return {@link SQLField#id()}
+     */
     public boolean key() {
         return key;
     }
 
-    public SQLType sqlType() {
+    /**
+     * @return {@link SQLType}
+     */
+    @NotNull
+    public SQLType<T> sqlType() {
         return sqlType;
     }
 
+    /**
+     * @return 自增id
+     */
     public boolean autoIncrement() {
         return autoIncrement;
     }
 
+    /**
+     * @return {@link SQLField.Order}
+     */
+    @NotNull
     public SQLField.Order order() {
         return order;
     }
 
-    public Class<?> type() {
-        return type;
+    /**
+     * @return 成员变量类型
+     */
+    @NotNull
+    public Class<T> type() {
+        return (Class<T>) type;
     }
 
+    /**
+     * @return 数组的类型
+     * @apiNote 为数组时有效
+     */
+    @Nullable
     public Class<?> componentType() {
         return componentType;
     }
 
+    @NotNull
     public SQLibrary sqlibrary() {
         return sqlibrary;
     }

@@ -31,52 +31,68 @@ public class HutoolAdapter {
     }
 
     protected static void registerSQLType(SQLTypes sqlTypes) {
-        SQLTypeParser<Collection<?>> collectionParser = (resultSet, fieldName, fieldMetaData) -> new CollectionConverter(fieldMetaData.type()).convert(resultSet.getString(fieldName), null);
-        SQLTypeParser<Object[]> arrayParser = (resultSet, fieldName, fieldMetaData) -> {
-            String data = resultSet.getString(fieldName);
-            int min = Math.min(data.length(), 1);
-            int max = Math.max(0, data.length() - 1);
-            String str = data.substring(min, max);
-            String[] strings = Arrays.stream(str.split(",")).map(String::trim).toArray(String[]::new);
-            Class<?> componentType = fieldMetaData.componentType();
-            Object[] array = ArrayUtil.newArray(componentType, strings.length);
-            for (int i = 0; i < strings.length; i++) {
-                String s = strings[i];
-                if (s.equals("null")) {
-                    array[i] = null;
-                } else {
-                    array[i] = Convert.convert(componentType, s, ClassUtil.getDefaultValue(componentType));
-                }
+        SQLTypeParser<Collection<?>> collectionParser = new SQLTypeParser<Collection<?>>() {
+            @Override
+            public <I> Collection<?> parser(ResultSet resultSet, String fieldName, SQLEntityFieldMetaData<I, Collection<?>> fieldMetaData) throws SQLException {
+                return new CollectionConverter(fieldMetaData.type()).convert(resultSet.getString(fieldName), null);
             }
-            return array;
         };
-        sqlTypes.registerSQLTypeWithParser(Map.class, new SQLType("MEDIUMTEXT"), (SQLTypeParser<Map<?, ?>>) (resultSet, fieldName, fieldMetaData) -> new MapConverter(fieldMetaData.type()).convert(resultSet.getString(fieldName), null));
-        sqlTypes.registerSQLTypeWithParser(Set.class, new SQLType("MEDIUMTEXT"), collectionParser);
-        sqlTypes.registerSQLTypeWithParser(List.class, new SQLType("MEDIUMTEXT"), collectionParser);
-        sqlTypes.registerSQLTypeWithParser(Collection.class, new SQLType("MEDIUMTEXT"), collectionParser);
+        SQLTypeParser<Object[]> arrayParser = new SQLTypeParser<Object[]>() {
+            @Override
+            public <I> Object[] parser(ResultSet resultSet, String fieldName, SQLEntityFieldMetaData<I, Object[]> fieldMetaData) throws SQLException {
+                String data = resultSet.getString(fieldName);
+                int min = Math.min(data.length(), 1);
+                int max = Math.max(0, data.length() - 1);
+                String str = data.substring(min, max);
+                String[] strings = Arrays.stream(str.split(",")).map(String::trim).toArray(String[]::new);
+                Class<?> componentType = fieldMetaData.componentType();
+                if (componentType == null) {
+                    return null;
+                }
+                Object[] array = ArrayUtil.newArray(componentType, strings.length);
+                for (int i = 0; i < strings.length; i++) {
+                    String s = strings[i];
+                    if (s.equals("null")) {
+                        array[i] = null;
+                    } else {
+                        array[i] = Convert.convert(componentType, s, ClassUtil.getDefaultValue(componentType));
+                    }
+                }
+                return array;
+            }
+        };
+        sqlTypes.registerSQLTypeWithParser(Map.class, new SQLType<>("MEDIUMTEXT"), new SQLTypeParser<Object>() {
+            @Override
+            public <I> Object parser(ResultSet resultSet, String fieldName, SQLEntityFieldMetaData<I, Object> fieldMetaData) throws SQLException {
+                return new MapConverter(fieldMetaData.type()).convert(resultSet.getString(fieldName), null);
+            }
+        });
+        sqlTypes.registerSQLTypeWithParser(Set.class, new SQLType<>("MEDIUMTEXT"), collectionParser);
+        sqlTypes.registerSQLTypeWithParser(List.class, new SQLType<>("MEDIUMTEXT"), collectionParser);
+        sqlTypes.registerSQLTypeWithParser(Collection.class, new SQLType<>("MEDIUMTEXT"), collectionParser);
 
-        sqlTypes.registerSQLTypeWithParser(int[].class, new SQLType("MEDIUMTEXT"), arrayParser);
-        sqlTypes.registerSQLTypeWithParser(Integer[].class, new SQLType("MEDIUMTEXT"), arrayParser);
-        sqlTypes.registerSQLTypeWithParser(Double[].class, new SQLType("MEDIUMTEXT"), arrayParser);
-        sqlTypes.registerSQLTypeWithParser(double[].class, new SQLType("MEDIUMTEXT"), arrayParser);
-        sqlTypes.registerSQLTypeWithParser(Long[].class, new SQLType("MEDIUMTEXT"), arrayParser);
-        sqlTypes.registerSQLTypeWithParser(long[].class, new SQLType("MEDIUMTEXT"), arrayParser);
-        sqlTypes.registerSQLTypeWithParser(Short[].class, new SQLType("MEDIUMTEXT"), arrayParser);
-        sqlTypes.registerSQLTypeWithParser(short[].class, new SQLType("MEDIUMTEXT"), arrayParser);
-        sqlTypes.registerSQLTypeWithParser(Float[].class, new SQLType("MEDIUMTEXT"), arrayParser);
-        sqlTypes.registerSQLTypeWithParser(float[].class, new SQLType("MEDIUMTEXT"), arrayParser);
-        sqlTypes.registerSQLTypeWithParser(Boolean[].class, new SQLType("MEDIUMTEXT"), arrayParser);
-        sqlTypes.registerSQLTypeWithParser(boolean[].class, new SQLType("MEDIUMTEXT"), arrayParser);
-        sqlTypes.registerSQLTypeWithParser(String[].class, new SQLType("MEDIUMTEXT"), arrayParser);
-        sqlTypes.registerSQLTypeWithParser(Object[].class, new SQLType("MEDIUMTEXT"), arrayParser);
-        sqlTypes.registerSQLTypeWithParser(String[].class, new SQLType("MEDIUMTEXT"), arrayParser);
+        sqlTypes.registerSQLTypeWithParser(int[].class, new SQLType<>("MEDIUMTEXT"), arrayParser);
+        sqlTypes.registerSQLTypeWithParser(Integer[].class, new SQLType<>("MEDIUMTEXT"), arrayParser);
+        sqlTypes.registerSQLTypeWithParser(Double[].class, new SQLType<>("MEDIUMTEXT"), arrayParser);
+        sqlTypes.registerSQLTypeWithParser(double[].class, new SQLType<>("MEDIUMTEXT"), arrayParser);
+        sqlTypes.registerSQLTypeWithParser(Long[].class, new SQLType<>("MEDIUMTEXT"), arrayParser);
+        sqlTypes.registerSQLTypeWithParser(long[].class, new SQLType<>("MEDIUMTEXT"), arrayParser);
+        sqlTypes.registerSQLTypeWithParser(Short[].class, new SQLType<>("MEDIUMTEXT"), arrayParser);
+        sqlTypes.registerSQLTypeWithParser(short[].class, new SQLType<>("MEDIUMTEXT"), arrayParser);
+        sqlTypes.registerSQLTypeWithParser(Float[].class, new SQLType<>("MEDIUMTEXT"), arrayParser);
+        sqlTypes.registerSQLTypeWithParser(float[].class, new SQLType<>("MEDIUMTEXT"), arrayParser);
+        sqlTypes.registerSQLTypeWithParser(Boolean[].class, new SQLType<>("MEDIUMTEXT"), arrayParser);
+        sqlTypes.registerSQLTypeWithParser(boolean[].class, new SQLType<>("MEDIUMTEXT"), arrayParser);
+        sqlTypes.registerSQLTypeWithParser(String[].class, new SQLType<>("MEDIUMTEXT"), arrayParser);
+        sqlTypes.registerSQLTypeWithParser(Object[].class, new SQLType<>("MEDIUMTEXT"), arrayParser);
+        sqlTypes.registerSQLTypeWithParser(String[].class, new SQLType<>("MEDIUMTEXT"), arrayParser);
     }
 
     public static boolean supportHutool() {
         return hutool;
     }
 
-    public static Object getResult(ResultSet rs, SQLEntityFieldMetaData<?> meta) {
+    public static <I, T> T getResult(ResultSet rs, SQLEntityFieldMetaData<I, T> meta) {
         try {
             return convert(meta.type(), rs.getString(meta.fieldName()));
         } catch (SQLException e) {

@@ -70,7 +70,7 @@ public @interface SQLField {
          */
         TO_STRING() {
             @Override
-            public Object transform(SQLEntityFieldMetaData<?> fieldMetaData, Object o) {
+            public <T, I> Object transform(SQLEntityFieldMetaData<T, I> fieldMetaData, Object o) {
                 if (o == null) {
                     return null;
                 }
@@ -82,14 +82,14 @@ public @interface SQLField {
          */
         JSON() {
             @Override
-            public Object transform(SQLEntityFieldMetaData<?> fieldMetaData, Object o) {
+            public <T, I> Object transform(SQLEntityFieldMetaData<T, I> fieldMetaData, Object o) {
                 return fieldMetaData.sqlibrary().gson().toJson(o);
             }
         },
         ;
 
         @Nullable
-        public Object transform(SQLEntityFieldMetaData<?> fieldMetaData, Object o) {
+        public <T, I> Object transform(SQLEntityFieldMetaData<T, I> fieldMetaData, Object o) {
             return o;
         }
     }

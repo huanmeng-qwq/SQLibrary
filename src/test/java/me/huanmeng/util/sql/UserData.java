@@ -3,6 +3,8 @@ package me.huanmeng.util.sql;
 import me.huanmeng.util.sql.api.annotation.SQLEntity;
 import me.huanmeng.util.sql.api.annotation.SQLField;
 
+import java.util.List;
+
 /**
  * 2022/10/2<br>
  * SQLibrary<br>
@@ -14,11 +16,11 @@ public class UserData {
     @SQLField(id = true, isAutoIncrement = true)
     private Long dbId;
     @SQLField
-    private String username;
+    private List<String> username;
     @SQLField
     private Integer age;
 
-    public UserData(Long dbId, String username, Integer age) {
+    public UserData(Long dbId, List<String> username, Integer age) {
         this.dbId = dbId;
         this.username = username;
         this.age = age;
@@ -32,11 +34,11 @@ public class UserData {
         this.dbId = dbId;
     }
 
-    public String getUsername() {
+    public List<String> getUsername() {
         return username;
     }
 
-    public void setUsername(String username) {
+    public void setUsername(List<String> username) {
         this.username = username;
     }
 
