@@ -1,6 +1,8 @@
 package me.huanmeng.util.sql.api.annotation;
 
+import com.google.gson.Gson;
 import me.huanmeng.util.sql.impl.SQLEntityFieldMetaData;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.*;
 
@@ -42,20 +44,30 @@ public @interface SQLField {
     Order orderBy() default Order.NONE;
 
     /**
-     * 序列化
-     *
-     * @return
+     * @return 序列化类型
      */
     Serialize serialize() default Serialize.NONE;
 
-    public static enum Order {
+    /**
+     * 排序
+     */
+    enum Order {
         NONE,
         ASC,
         DESC
     }
 
+    /**
+     * 序列化
+     */
     enum Serialize {
+        /**
+         * 直接返回
+         */
         NONE,
+        /**
+         * @see Object#toString()
+         */
         TO_STRING() {
             @Override
             public Object transform(SQLEntityFieldMetaData<?> fieldMetaData, Object o) {
@@ -65,6 +77,9 @@ public @interface SQLField {
                 return o.toString();
             }
         },
+        /**
+         * @see Gson#toJson(Object)
+         */
         JSON() {
             @Override
             public Object transform(SQLEntityFieldMetaData<?> fieldMetaData, Object o) {
@@ -73,6 +88,7 @@ public @interface SQLField {
         },
         ;
 
+        @Nullable
         public Object transform(SQLEntityFieldMetaData<?> fieldMetaData, Object o) {
             return o;
         }

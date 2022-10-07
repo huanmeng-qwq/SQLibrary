@@ -1,7 +1,9 @@
 package me.huanmeng.util.sql.api;
 
 import cc.carm.lib.easysql.api.SQLManager;
+import me.huanmeng.util.sql.api.annotation.SQLField;
 import me.huanmeng.util.sql.impl.SQLEntityInstance;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -18,30 +20,47 @@ public interface SQLEntityManager<T> {
      * 查询1个实体
      *
      * @param values 条件
+     * @apiNote {@link SQLField#id()}
      * @see SQLEntityInstance#keyNames()
      * @see #selectFirst(Object...)
      * @deprecated
      */
     @Deprecated
+    @Nullable
     T select(Object... values);
 
-    T selectFirst(String[] name,Object... values);
+    /**
+     * @param name   字段名
+     * @param values 字段值
+     * @return 结果
+     */
+    @Nullable
+    T selectFirst(@NotNull String[] name, @NotNull Object... values);
 
-    List<T> selectAny(String[] name,Object... values);
+    /**
+     * @param name   字段名
+     * @param values 字段值
+     * @return 结果
+     */
+    @NotNull
+    List<T> selectAny(@NotNull String[] name, @NotNull Object... values);
 
     /**
      * 查询1个实体
      *
      * @param values 条件
+     * @apiNote {@link SQLField#id()}
      * @see SQLEntityInstance#keyNames()
      */
-    T selectFirst(Object... values);
+    @Nullable
+    T selectFirst(@NotNull Object... values);
 
     /**
      * 查询N个实体
      *
      * @param limit 条数
      */
+    @NotNull
     List<T> select(int limit);
 
     /**
@@ -50,6 +69,7 @@ public interface SQLEntityManager<T> {
      * @param limit     条数
      * @param orderData 排序 可选
      */
+    @NotNull
     List<T> select(int limit, @Nullable SQLOrderData orderData);
 
     /**
@@ -59,27 +79,36 @@ public interface SQLEntityManager<T> {
      * @param orderData 排序 可选
      * @param values    条件
      * @apiNote 条件数组是
+     * @apiNote {@link SQLField#id()}
+     * @apiNote {@link SQLField#isAutoIncrement()}
      */
-    List<T> selectAny(int limit, @Nullable SQLOrderData orderData, Object... values);
+    @NotNull
+    List<T> selectAny(int limit, @Nullable SQLOrderData orderData, @NotNull Object... values);
 
     /**
      * 查询1个实体并排序
      *
      * @param orderData 排序 可选
      * @param values    条件
+     * @apiNote {@link SQLField#id()}
+     * @apiNote {@link SQLField#isAutoIncrement()}
      */
-    T select(@Nullable SQLOrderData orderData, Object... values);
+    @Nullable
+    T select(@Nullable SQLOrderData orderData, @NotNull Object... values);
 
     /**
      * 查询N个实体
      *
      * @param values 条件
+     * @apiNote {@link SQLField#id()}
      */
-    List<T> selectAll(Object... values);
+    @NotNull
+    List<T> selectAll(@NotNull Object... values);
 
     /**
      * 查询所有实体
      */
+    @NotNull
     List<T> selectAll();
 
     /**
@@ -87,65 +116,74 @@ public interface SQLEntityManager<T> {
      * 前提是它已经存在
      *
      * @param entity 实例
+     * @apiNote {@link SQLField#id()}
      */
-    void update(T entity);
+    void update(@NotNull T entity);
 
     /**
      * 写入一条数据
      *
      * @param entity 实例
+     * @apiNote {@link SQLField#id()}
      */
-    T insert(T entity);
+    @Nullable
+    T insert(@NotNull T entity);
 
     /**
      * 更新或写入一条数据
      *
      * @param entity 实例
+     * @apiNote {@link SQLField#id()}
      */
-    T updateOrInsert(T entity);
+    @Nullable
+    T updateOrInsert(@NotNull T entity);
 
     /**
      * 是否存在这一条数据
      *
      * @param values 条件
+     * @apiNote {@link SQLField#id()}
      */
-    boolean exist(Object... values);
+    boolean exist(@NotNull Object... values);
 
     /**
      * 是否存在这一条数据
      *
      * @param entity 实例
+     * @apiNote {@link SQLField#id()}
      */
-    boolean exist(T entity);
+    boolean exist(@NotNull T entity);
 
     /**
      * 删除一个数据
      *
      * @param values 条件
+     * @apiNote {@link SQLField#id()}
      * @see #delete(T)
      */
-    void delete(Object... values);
+    void delete(@NotNull Object... values);
 
     /**
      * 删除一条数据
      *
      * @param entity 实例
      */
-    void delete(T entity);
+    void delete(@NotNull T entity);
 
     /**
      * 查询一个数据
      *
      * @param entity 示例
      */
-    T select(T entity);
+    @Nullable
+    T select(@NotNull T entity);
 
     /**
      * 自定义操作
      *
      * @param run 执行
      */
-    void custom(BiConsumer<SQLManager, SQLEntityInstance<T>> run);
+    void custom(@NotNull BiConsumer<SQLManager, SQLEntityInstance<T>> run);
 
     // Debug
     boolean toggleDebug();

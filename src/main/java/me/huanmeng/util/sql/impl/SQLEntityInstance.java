@@ -9,6 +9,8 @@ import me.huanmeng.util.sql.api.SQLEntityManager;
 import me.huanmeng.util.sql.api.SQLibrary;
 import me.huanmeng.util.sql.api.annotation.SQLField;
 import me.huanmeng.util.sql.util.ReflectUtil;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -45,7 +47,7 @@ public class SQLEntityInstance<T> {
      */
     public void createTable() throws SQLException {
         // create table.
-        final TableCreateBuilder table = sqlManager.createTable(metaData.tableName());
+        TableCreateBuilder table = sqlManager.createTable(metaData.tableName());
         List<String> keys = new ArrayList<>();
         for (SQLEntityFieldMetaData<T> field : metaData.fields()) {
             if (field.key()) {
@@ -100,7 +102,8 @@ public class SQLEntityInstance<T> {
      * @param rs 结果集
      * @return 实例
      */
-    public T transform(ResultSet rs) {
+    @NotNull
+    public T transform(@NotNull ResultSet rs) {
         final T instance = newInstance();
         for (SQLEntityFieldMetaData<T> field : metaData().fields()) {
             field.sqlType().transform(rs, field, instance);
@@ -114,6 +117,7 @@ public class SQLEntityInstance<T> {
      * @return 空数据实例
      * @apiNote 包装类型默认0/false
      */
+    @Nullable
     public T newInstance() {
         return ReflectUtil.newInstanceIfPossible(clazz);
     }
@@ -122,6 +126,7 @@ public class SQLEntityInstance<T> {
      * @return 所有索引字段名字
      * @see SQLField#id()
      */
+    @NotNull
     public String[] keyNames() {
         return keyNames(false);
     }
@@ -130,6 +135,7 @@ public class SQLEntityInstance<T> {
      * @param all 是否包含自增的字段
      * @return 所有索引字段名字
      */
+    @NotNull
     public String[] keyNames(boolean all) {
         final ArrayList<String> list = new ArrayList<>();
         for (SQLEntityFieldMetaData<T> field : metaData.fields()) {
@@ -144,7 +150,8 @@ public class SQLEntityInstance<T> {
      * @param entity 实例
      * @return 实例的所有字段的值(除了自增的)
      */
-    public Object[] keyValues(T entity) {
+    @NotNull
+    public Object[] keyValues(@NotNull T entity) {
         final ArrayList<Object> list = new ArrayList<>();
         for (SQLEntityFieldMetaData<T> field : metaData.fields()) {
             if (field.key() && !field.autoIncrement()) {
@@ -156,10 +163,11 @@ public class SQLEntityInstance<T> {
 
     /**
      * @param entity 实例
-     * @param all 是否包含自增字段
+     * @param all    是否包含自增字段
      * @return 实例的所有字段的值
      */
-    public Object[] keyValues(T entity, boolean all) {
+    @NotNull
+    public Object[] keyValues(@NotNull T entity, boolean all) {
         final ArrayList<Object> list = new ArrayList<>();
         for (SQLEntityFieldMetaData<T> field : metaData.fields()) {
             if (field.key() && (all || !field.autoIncrement())) {
@@ -172,6 +180,7 @@ public class SQLEntityInstance<T> {
     /**
      * @return 所有字段名字
      */
+    @NotNull
     public String[] fieldNames() {
         final ArrayList<String> list = new ArrayList<>();
         for (SQLEntityFieldMetaData<T> field : metaData.fields()) {
@@ -186,7 +195,8 @@ public class SQLEntityInstance<T> {
      * @param entity 实例
      * @return 所有字段的值
      */
-    public Object[] fieldValues(T entity) {
+    @NotNull
+    public Object[] fieldValues(@NotNull T entity) {
         final ArrayList<Object> list = new ArrayList<>();
         for (SQLEntityFieldMetaData<T> field : metaData.fields()) {
             if (!field.key() && !field.autoIncrement()) {
@@ -200,6 +210,7 @@ public class SQLEntityInstance<T> {
      * @param all 是否包含自增字段
      * @return 所有字段的名字
      */
+    @NotNull
     public String[] names(boolean all) {
         final ArrayList<String> list = new ArrayList<>();
         for (SQLEntityFieldMetaData<T> field : metaData.fields()) {
@@ -213,6 +224,7 @@ public class SQLEntityInstance<T> {
     /**
      * @return 所有字段的名字
      */
+    @NotNull
     public String[] names() {
         return names(false);
     }
@@ -220,16 +232,18 @@ public class SQLEntityInstance<T> {
     /**
      * @return 所有字段的值
      */
-    public Object[] values(T entity) {
+    @NotNull
+    public Object[] values(@NotNull T entity) {
         return values(entity, false);
     }
 
     /**
      * @param entity 实例
-     * @param all 是否包含自增字段
+     * @param all    是否包含自增字段
      * @return 所有字段的值
      */
-    public Object[] values(T entity, boolean all) {
+    @NotNull
+    public Object[] values(@NotNull T entity, boolean all) {
         final ArrayList<Object> list = new ArrayList<>();
         for (SQLEntityFieldMetaData<T> field : metaData.fields()) {
             if (!field.autoIncrement() || all) {
@@ -244,6 +258,7 @@ public class SQLEntityInstance<T> {
     /**
      * @return {@link SQLManager}
      */
+    @NotNull
     public SQLManager sqlManager() {
         return sqlManager;
     }
@@ -251,6 +266,7 @@ public class SQLEntityInstance<T> {
     /**
      * @return {@link SQLEntityManager}
      */
+    @NotNull
     public SQLEntityManagerImpl<T> sqlEntityManager() {
         return sqlEntityManager;
     }
@@ -258,6 +274,7 @@ public class SQLEntityInstance<T> {
     /**
      * @return {@link SQLEntityMetaData}
      */
+    @NotNull
     public SQLEntityMetaData<T> metaData() {
         return metaData;
     }

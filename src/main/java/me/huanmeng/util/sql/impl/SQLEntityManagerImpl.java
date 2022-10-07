@@ -9,7 +9,8 @@ import cc.carm.lib.easysql.api.builder.TableQueryBuilder;
 import cc.carm.lib.easysql.api.builder.UpdateBuilder;
 import me.huanmeng.util.sql.api.SQLEntityManager;
 import me.huanmeng.util.sql.api.SQLOrderData;
-import me.huanmeng.util.sql.api.SQLQueryExecute;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -46,8 +47,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
         if (holder.metaData().orderData() != null) {
             builder.orderBy(holder.metaData().orderData().name(), holder.metaData().orderData().asc());
         }
-        try (SQLQuery query = builder
-                .build().execute()) {
+        try (SQLQuery query = builder.build().execute()) {
             ResultSet rs = query.getResultSet();
             if (rs.next()) {
                 return transform(rs);
@@ -58,18 +58,19 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
         return null;
     }
 
-    public T transform(ResultSet rs) {
+    @NotNull
+    public T transform(@NotNull ResultSet rs) {
         return holder.transform(rs);
     }
 
-    public void transformToList(List<T> list, ResultSet resultSet) throws SQLException {
+    public void transformToList(@NotNull List<T> list, @NotNull ResultSet resultSet) throws SQLException {
         while (resultSet.next()) {
             list.add(holder.transform(resultSet));
         }
     }
 
     @Override
-    public List<T> selectAny(String[] name, Object... values) {
+    public @NotNull List<T> selectAny(String[] name, Object... values) {
         List<T> list = new ArrayList<>();
         TableQueryBuilder builder = holder.sqlManager().createQuery()
                 .inTable(holder.metaData().tableName())
@@ -91,7 +92,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
         return selectFirst(false, values);
     }
 
-    public T selectFirst(boolean all, Object... values) {
+    public T selectFirst(boolean all, @NotNull Object... values) {
         TableQueryBuilder tableQueryBuilder = holder.sqlManager().createQuery()
                 .inTable(holder.metaData().tableName()).setLimit(1);
         fillCondition(tableQueryBuilder, all, values);
@@ -110,7 +111,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     }
 
     @Override
-    public List<T> select(int limit) {
+    public @NotNull List<T> select(int limit) {
         TableQueryBuilder tableQueryBuilder = holder.sqlManager().createQuery()
                 .inTable(holder.metaData().tableName())
                 .setLimit(limit);
@@ -128,7 +129,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     }
 
     @Override
-    public T select(SQLOrderData orderData, Object... values) {
+    public @Nullable T select(SQLOrderData orderData, Object... values) {
         TableQueryBuilder tableQueryBuilder = holder.sqlManager().createQuery()
                 .inTable(holder.metaData().tableName());
         if (orderData != null) {
@@ -146,7 +147,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     }
 
     @Override
-    public List<T> select(int limit, SQLOrderData orderData) {
+    public @NotNull List<T> select(int limit, SQLOrderData orderData) {
         SQLEntityMetaData<T> metaData = holder.metaData();
         TableQueryBuilder tableQueryBuilder = holder.sqlManager().createQuery()
                 .inTable(metaData.tableName())
@@ -166,7 +167,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     }
 
     @Override
-    public List<T> selectAny(int limit, SQLOrderData orderData, Object... values) {
+    public @NotNull List<T> selectAny(int limit, SQLOrderData orderData, @NotNull Object @NotNull ... values) {
         SQLEntityMetaData<T> metaData = holder.metaData();
         TableQueryBuilder tableQueryBuilder = holder.sqlManager().createQuery()
                 .inTable(metaData.tableName())
@@ -188,7 +189,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     }
 
     @Override
-    public List<T> selectAll(Object... values) {
+    public @NotNull List<T> selectAll(Object... values) {
         TableQueryBuilder tableQueryBuilder = holder.sqlManager().createQuery()
                 .inTable(holder.metaData().tableName());
         fillCondition(tableQueryBuilder, false, values);
@@ -206,7 +207,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     }
 
     @Override
-    public List<T> selectAll() {
+    public @NotNull List<T> selectAll() {
         ArrayList<T> ts = new ArrayList<>();
         try (SQLQuery query = holder.sqlManager().createQuery()
                 .inTable(holder.metaData().tableName())
@@ -220,7 +221,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     }
 
     @Override
-    public void update(T entity) {
+    public void update(@NotNull T entity) {
         List<SQLEntityFieldMetaData<T>> list = holder.metaData().getAutoIncrementFields();
         UpdateBuilder updateBuilder = holder.sqlManager().createUpdate(holder.metaData().tableName()).setLimit(1);
         if (list.size() == 1) {
@@ -246,7 +247,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     }
 
     @Override
-    public T insert(T entity) {
+    public @Nullable T insert(@NotNull T entity) {
         try {
             holder.sqlManager().createInsert(holder.metaData().tableName())
                     .setColumnNames(holder.names())
@@ -277,7 +278,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     }
 
     @Override
-    public T updateOrInsert(T entity) {
+    public @Nullable T updateOrInsert(@NotNull T entity) {
         if (exist(entity)) {
             update(entity);
             return null;
@@ -286,7 +287,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     }
 
     @Override
-    public boolean exist(T entity) {
+    public boolean exist(@NotNull T entity) {
         boolean exist;
         TableQueryBuilder tableQueryBuilder = holder.sqlManager().createQuery()
                 .inTable(holder.metaData().tableName());
@@ -303,7 +304,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     }
 
     @Override
-    public void delete(T entity) {
+    public void delete(@NotNull T entity) {
         try {
             holder.sqlManager().createDelete(holder.metaData().tableName())
                     .addCondition(holder.names(false), holder.values(entity, false))
@@ -314,12 +315,12 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     }
 
     @Override
-    public T select(T userData) {
+    public @Nullable T select(@NotNull T userData) {
         return selectFirst(true, holder.keyValues(userData, true));
     }
 
     @Override
-    public void custom(BiConsumer<SQLManager, SQLEntityInstance<T>> run) {
+    public void custom(@NotNull BiConsumer<SQLManager, SQLEntityInstance<T>> run) {
         run.accept(holder.sqlManager(), holder);
     }
 
@@ -342,7 +343,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
 
 
     @Override
-    public void delete(Object... values) {
+    public void delete(@NotNull Object @NotNull ... values) {
         try {
             DeleteBuilder deleteBuilder = holder.sqlManager().createDelete(holder.metaData().tableName());
             fillCondition(deleteBuilder, false, values);
@@ -353,7 +354,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     }
 
     @Override
-    public boolean exist(Object... values) {
+    public boolean exist(@NotNull Object @NotNull ... values) {
         boolean exist;
         TableQueryBuilder tableQueryBuilder = holder.sqlManager().createQuery()
                 .inTable(holder.metaData().tableName());
@@ -366,14 +367,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
         return exist;
     }
 
-
-    private <ACTION extends SQLAction<?>, RESULT> void execute(ACTION query, boolean async, SQLQueryExecute<ACTION, RESULT> execute) {
-        if (async) {
-            query.executeAsync();
-        }
-    }
-
-    protected void fillCondition(ConditionalBuilder<?, ?> conditionalBuilder, boolean all, Object... values) {
+    protected void fillCondition(@NotNull ConditionalBuilder<?, ?> conditionalBuilder, boolean all, @NotNull Object... values) {
         Map<String, Object> map = new LinkedHashMap<>();
         String[] keyNames = holder.keyNames(all);
         for (int i = 0; i < keyNames.length; i++) {

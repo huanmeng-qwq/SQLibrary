@@ -8,6 +8,7 @@ import com.google.gson.GsonBuilder;
 import me.huanmeng.util.sql.impl.SQLEntityInstance;
 import me.huanmeng.util.sql.type.SQLType;
 import me.huanmeng.util.sql.type.SQLTypes;
+import org.jetbrains.annotations.NotNull;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
@@ -23,13 +24,13 @@ import java.util.function.Supplier;
  */
 @SuppressWarnings("unchecked")
 public class SQLibrary {
-    private final Map<Class<?>, SQLEntityInstance<?>> INSTANCE_MAP = new ConcurrentHashMap<>();
+    protected final Map<Class<?>, SQLEntityInstance<?>> INSTANCE_MAP = new ConcurrentHashMap<>();
 
-    private final DataSource dataSource;
+    protected final DataSource dataSource;
     protected final SQLTypes sqlTypes;
     protected Gson gson;
 
-    public SQLibrary(DataSource dataSource) {
+    public SQLibrary(@NotNull DataSource dataSource) {
         this.dataSource = dataSource;
         this.sqlTypes = new SQLTypes();
         this.gson = new GsonBuilder().create();
@@ -41,7 +42,8 @@ public class SQLibrary {
      * @param clazz      对应类
      * @param sqlManager {@link SQLManager}
      */
-    public <T> SQLEntityInstance<T> instanceOrCreate(Class<T> clazz, Supplier<SQLManager> sqlManager) {
+    @NotNull
+    public <T> SQLEntityInstance<T> instanceOrCreate(@NotNull Class<T> clazz, @NotNull Supplier<SQLManager> sqlManager) {
         return (SQLEntityInstance<T>) INSTANCE_MAP.computeIfAbsent(clazz, c -> {
             try {
                 return new SQLEntityInstance<>(this, c, sqlManager.get());
@@ -51,39 +53,47 @@ public class SQLibrary {
         });
     }
 
-    public <T> SQLEntityInstance<T> instance(Class<T> clazz) {
+    @NotNull
+    public <T> SQLEntityInstance<T> instance(@NotNull Class<T> clazz) {
         return instanceOrCreate(clazz, createManager());
     }
 
-    public <T> SQLEntityManager<T> manager(Class<T> clazz) {
+    @NotNull
+    public <T> SQLEntityManager<T> manager(@NotNull Class<T> clazz) {
         return manager(clazz, createManager());
     }
 
-    public <T> SQLEntityManager<T> manager(Class<T> clazz, Supplier<SQLManager> sqlManager) {
+    @NotNull
+    public <T> SQLEntityManager<T> manager(@NotNull Class<T> clazz, @NotNull Supplier<SQLManager> sqlManager) {
         return instanceOrCreate(clazz, sqlManager).sqlEntityManager();
     }
 
+    @NotNull
     public Supplier<SQLManager> createManager() {
         return () -> new SQLManagerImpl(dataSource);
     }
 
-    public Supplier<SQLManager> createManager(DataSource dataSource) {
+    @NotNull
+    public Supplier<SQLManager> createManager(@NotNull DataSource dataSource) {
         return () -> new SQLManagerImpl(dataSource);
     }
 
+    @NotNull
     public DataSource dataSource() {
         return dataSource;
     }
 
+    @NotNull
     public SQLTypes sqlTypes() {
         return sqlTypes;
     }
 
-    public SQLType typeByClass(Class<?> type) {
+    @NotNull
+    public SQLType typeByClass(@NotNull Class<?> type) {
         return sqlTypes.getSQLType(type);
     }
 
-    public boolean remove(Class<?> clazz) {
+    public boolean remove(@NotNull Class<?> clazz) {
         if (INSTANCE_MAP.containsKey(clazz)) {
             SQLEntityInstance<?> sqlEntityInstance = INSTANCE_MAP.get(clazz);
             EasySQL.shutdownManager(sqlEntityInstance.sqlManager());
@@ -102,11 +112,13 @@ public class SQLibrary {
         return true;
     }
 
+    @NotNull
     public Gson gson() {
         return gson;
     }
 
-    public SQLibrary gson(Gson gson) {
+    @NotNull
+    public SQLibrary gson(@NotNull Gson gson) {
         this.gson = gson;
         return this;
     }

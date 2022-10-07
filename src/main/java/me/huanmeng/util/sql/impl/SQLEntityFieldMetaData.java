@@ -24,8 +24,6 @@ import java.util.logging.Logger;
  * @author huanmeng_qwq
  */
 public class SQLEntityFieldMetaData<T> {
-    private static final String EASY_SQL_VERSION = VersionUtil.getMavenVersion(SQLManager.class, "cc.carm.lib/easysql-api");
-    private static final Logger log = Logger.getLogger("SQLEntityField");
     private final SQLibrary sqlibrary;
     private final Field field;
     private String fieldName;
@@ -94,7 +92,7 @@ public class SQLEntityFieldMetaData<T> {
                 field.set(instance, obj);
             }
         } catch (Exception e) {
-            throw new RuntimeException(String.format("设置字段 %s 时出现了错误,value:%s", this.simpleName + "#" + this.fieldName, obj), e);
+            throw new RuntimeException(String.format("设置成员变量 %s 时出现了错误,value: %s", this.simpleName + "#" + this.fieldName, obj), e);
         }
     }
 
@@ -112,7 +110,7 @@ public class SQLEntityFieldMetaData<T> {
             }
             return o;
         } catch (IllegalAccessException e) {
-            throw new RuntimeException(String.format("获取 %s 的 %s 值出现了错误", entity, fieldName), e);
+            throw new RuntimeException(String.format("获取 %s 的 %s 成员变量出现了错误", entity, fieldName), e);
         }
     }
 
