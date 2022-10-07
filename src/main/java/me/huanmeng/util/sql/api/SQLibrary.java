@@ -22,7 +22,7 @@ import java.util.function.Supplier;
  *
  * @author huanmeng_qwq
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "unused"})
 public class SQLibrary {
     protected final Map<Class<?>, SQLEntityInstance<?>> INSTANCE_MAP = new ConcurrentHashMap<>();
 
@@ -43,7 +43,7 @@ public class SQLibrary {
      * @param sqlManager {@link SQLManager}
      */
     @NotNull
-    public <T> SQLEntityInstance<T> instanceOrCreate(@NotNull Class<T> clazz, @NotNull Supplier<SQLManager> sqlManager) {
+    public <T> SQLEntityInstance<T> instanceOrCreate(@NotNull Class<T> clazz, @NotNull Supplier<@NotNull SQLManager> sqlManager) {
         return (SQLEntityInstance<T>) INSTANCE_MAP.computeIfAbsent(clazz, c -> {
             try {
                 return new SQLEntityInstance<>(this, c, sqlManager.get());
@@ -58,23 +58,37 @@ public class SQLibrary {
         return instanceOrCreate(clazz, createManager());
     }
 
+    // ***** Sync *****
+
     @NotNull
     public <T> SQLEntityManager<T> manager(@NotNull Class<T> clazz) {
         return manager(clazz, createManager());
     }
 
     @NotNull
-    public <T> SQLEntityManager<T> manager(@NotNull Class<T> clazz, @NotNull Supplier<SQLManager> sqlManager) {
+    public <T> SQLEntityManager<T> manager(@NotNull Class<T> clazz, @NotNull Supplier<@NotNull SQLManager> sqlManager) {
         return instanceOrCreate(clazz, sqlManager).sqlEntityManager();
     }
 
+    // ***** Async *****
+
     @NotNull
-    public Supplier<SQLManager> createManager() {
+    public <T> SQLEntityManager<T> managerAsync(@NotNull Class<T> clazz) {
+        return manager(clazz).async();
+    }
+
+    @NotNull
+    public <T> SQLAsyncEntityManager<T> managerAsync(@NotNull Class<T> clazz, @NotNull Supplier<@NotNull SQLManager> sqlManager) {
+        return manager(clazz, sqlManager).async();
+    }
+
+    @NotNull
+    public Supplier<@NotNull SQLManager> createManager() {
         return () -> new SQLManagerImpl(dataSource);
     }
 
     @NotNull
-    public Supplier<SQLManager> createManager(@NotNull DataSource dataSource) {
+    public Supplier<@NotNull SQLManager> createManager(@NotNull DataSource dataSource) {
         return () -> new SQLManagerImpl(dataSource);
     }
 

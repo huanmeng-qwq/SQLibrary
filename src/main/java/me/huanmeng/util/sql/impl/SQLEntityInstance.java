@@ -59,6 +59,7 @@ public class SQLEntityInstance<T> {
                 table.addColumn(field.fieldName(), field.sqlType().toSQLString());
             }
         }
+        // 这里的keys集合会存在修改 但是alter也需要 所以这里先存一份在这里
         ArrayList<String> alterList = new ArrayList<>(keys);
         if (keys.size() == 1) {
             table.setIndex(keys.remove(0), IndexType.PRIMARY_KEY);
@@ -138,6 +139,10 @@ public class SQLEntityInstance<T> {
     @NotNull
     public String[] keyNames(boolean all) {
         final ArrayList<String> list = new ArrayList<>();
+        List<SQLEntityFieldMetaData<T>> fields = metaData.getAutoIncrementFields();
+        if (fields.size() == 1 && fields.get(0).key() && fields.get(0).autoIncrement()) {
+            return new String[]{fields.get(0).fieldName()};
+        }
         for (SQLEntityFieldMetaData<T> field : metaData.fields()) {
             if (field.key() && (!field.autoIncrement() || all)) {
                 list.add(field.fieldName());

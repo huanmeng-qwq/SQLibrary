@@ -7,6 +7,7 @@ import cc.carm.lib.easysql.api.builder.ConditionalBuilder;
 import cc.carm.lib.easysql.api.builder.DeleteBuilder;
 import cc.carm.lib.easysql.api.builder.TableQueryBuilder;
 import cc.carm.lib.easysql.api.builder.UpdateBuilder;
+import me.huanmeng.util.sql.api.SQLAsyncEntityManager;
 import me.huanmeng.util.sql.api.SQLEntityManager;
 import me.huanmeng.util.sql.api.SQLOrderData;
 import org.jetbrains.annotations.NotNull;
@@ -27,7 +28,8 @@ import java.util.function.BiConsumer;
  * @author huanmeng_qwq
  */
 public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
-    private final SQLEntityInstance<T> holder;
+    protected final SQLEntityInstance<T> holder;
+    protected SQLAsyncEntityManager<T> asyncEntityManager;
 
     public SQLEntityManagerImpl(SQLEntityInstance<T> holder) {
         this.holder = holder;
@@ -228,7 +230,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
             SQLEntityFieldMetaData<T> field = list.get(0);
             updateBuilder.addCondition(field.fieldName(), field.getEntityValue(entity));
             SQLAction<Integer> sqlAction = updateBuilder
-                    .setColumnValues(holder.names(false), holder.values(entity, false))
+                    .setColumnValues(holder.fieldNames(), holder.fieldValues(entity))
                     .build();
             try {
                 sqlAction.execute();
@@ -339,6 +341,14 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     @Override
     public boolean isDebug() {
         return holder.sqlManager().isDebugMode();
+    }
+
+    @Override
+    public SQLAsyncEntityManager<T> async() {
+        if (asyncEntityManager != null) {
+            return asyncEntityManager;
+        }
+        return asyncEntityManager = new SQLAsyncEntityManagerImpl<>(holder);
     }
 
 
