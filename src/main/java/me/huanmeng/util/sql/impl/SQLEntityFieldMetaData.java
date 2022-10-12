@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -145,7 +147,7 @@ public class SQLEntityFieldMetaData<I, T> {
      */
     public Object getEntityValue(@NotNull I entity) {
         try {
-            Object o = serialize.transform(this, field.get(entity));
+            Object o = serialize.serialize(this, field.get(entity));
             if (o instanceof Collection) {
                 o = o.toString();
             } else if (ArrayUtil.isArray(o)) {
@@ -157,6 +159,19 @@ public class SQLEntityFieldMetaData<I, T> {
             return o;
         } catch (IllegalAccessException e) {
             throw new RuntimeException(String.format("获取 %s 的 %s 成员变量出现了错误", entity, fieldName), e);
+        }
+    }
+
+    /**
+     * 反序列化字段
+     * @param resultSet 结果集
+     * @param instance 对象实例
+     */
+    public void deserialize(ResultSet resultSet, I instance) {
+        try {
+            serialize.deserialize(this, resultSet, instance);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 

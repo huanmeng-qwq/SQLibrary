@@ -5,6 +5,8 @@ import me.huanmeng.util.sql.impl.SQLEntityFieldMetaData;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * 2022/1/28<br>
@@ -70,7 +72,7 @@ public @interface SQLField {
          */
         TO_STRING() {
             @Override
-            public <T, I> Object transform(SQLEntityFieldMetaData<T, I> fieldMetaData, Object o) {
+            public <T, I> Object serialize(SQLEntityFieldMetaData<T, I> fieldMetaData, Object o) {
                 if (o == null) {
                     return null;
                 }
@@ -82,15 +84,25 @@ public @interface SQLField {
          */
         JSON() {
             @Override
-            public <T, I> Object transform(SQLEntityFieldMetaData<T, I> fieldMetaData, Object o) {
+            public <T, I> Object serialize(SQLEntityFieldMetaData<T, I> fieldMetaData, Object o) {
                 return fieldMetaData.sqlibrary().gson().toJson(o);
+            }
+
+            @Override
+            public <I, T> void deserialize(SQLEntityFieldMetaData<I, T> fieldMetaData, ResultSet resultSet, I instance) throws SQLException {
+                String data = resultSet.getString(fieldMetaData.fieldName());
+                fieldMetaData.setValue(instance, fieldMetaData.sqlibrary().gson().fromJson(data, fieldMetaData.type()));
             }
         },
         ;
 
         @Nullable
-        public <T, I> Object transform(SQLEntityFieldMetaData<T, I> fieldMetaData, Object o) {
+        public <T, I> Object serialize(SQLEntityFieldMetaData<T, I> fieldMetaData, Object o) {
             return o;
+        }
+
+        public <I, T> void deserialize(SQLEntityFieldMetaData<I, T> fieldMetaData, ResultSet resultSet, I instance) throws SQLException {
+            fieldMetaData.sqlType().transform(resultSet, fieldMetaData, instance);
         }
     }
 }

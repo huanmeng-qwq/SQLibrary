@@ -110,7 +110,7 @@ public class SQLEntityInstance<T> {
     public T transform(@NotNull ResultSet rs) {
         final T instance = newInstance();
         for (SQLEntityFieldMetaData<T, Object> field : metaData().fields()) {
-            field.sqlType().transform(rs, field, instance);
+            field.deserialize(rs, instance);
         }
         return instance;
     }
