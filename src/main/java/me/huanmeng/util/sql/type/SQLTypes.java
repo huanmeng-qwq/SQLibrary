@@ -35,7 +35,7 @@ public class SQLTypes {
      * 注册默认的解析器
      */
     protected void init() {
-        registerSQLType(String.class, new SQLType<>("VARCHAR", 255));
+        registerSQLTypeWithParser(String.class, new SQLType<>("VARCHAR", 255), SQLTypeParser.of(ResultSet::getString));
         registerSQLTypeWithParser(long.class, new SQLType<>("MEDIUMINT"), SQLTypeParser.of(ResultSet::getLong));
         registerSQLTypeWithParser(int.class, new SQLType<>("MEDIUMINT"), SQLTypeParser.of(ResultSet::getInt));
         registerSQLTypeWithParser(double.class, new SQLType<>("DOUBLE"), SQLTypeParser.of(ResultSet::getDouble));
