@@ -20,13 +20,12 @@ import java.util.Map;
 public class UserData {
     @SQLField(id = true, isAutoIncrement = true)
     private Long dbId;
-    @SQLField(serialize = SQLField.Serialize.JSON)
-    @SQLJson(targetClass = UserDataSerializer.class)
-    private List<String> username;
+    @SQLField
+    private String username;
     @SQLField
     private Integer age;
 
-    public UserData(Long dbId, List<String> username, Integer age) {
+    public UserData(Long dbId, String username, Integer age) {
         this.dbId = dbId;
         this.username = username;
         this.age = age;
@@ -40,11 +39,11 @@ public class UserData {
         this.dbId = dbId;
     }
 
-    public List<String> getUsername() {
+    public String getUsername() {
         return username;
     }
 
-    public void setUsername(List<String> username) {
+    public void setUsername(String username) {
         this.username = username;
     }
 

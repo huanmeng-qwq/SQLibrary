@@ -61,6 +61,11 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
         return null;
     }
 
+    @Override
+    public T selectFirst(@NotNull String name, @NotNull Object o) {
+        return selectFirst(new String[]{name}, o);
+    }
+
     @Nullable
     public T transform(@NotNull ResultSet rs) {
         return holder.transform(rs);
@@ -385,14 +390,18 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
         return exist;
     }
 
-    protected void fillCondition(@NotNull ConditionalBuilder<?, ?> conditionalBuilder, boolean all, @NotNull Object... values) {
+    protected void fillCondition(@NotNull ConditionalBuilder<?, ?> conditionalBuilder, boolean all, @Nullable Object... values) {
         Map<String, Object> map = new LinkedHashMap<>();
         String[] keyNames = holder.keyNames(all);
         for (int i = 0; i < keyNames.length; i++) {
             if (i >= values.length) {
                 break;
             }
-            map.put(keyNames[i], values[i]);
+            Object value = values[i];
+            if (value == null) {
+                continue;
+            }
+            map.put(keyNames[i], value);
         }
         conditionalBuilder.addCondition(map.keySet().toArray(new String[0]), map.values().toArray());
     }

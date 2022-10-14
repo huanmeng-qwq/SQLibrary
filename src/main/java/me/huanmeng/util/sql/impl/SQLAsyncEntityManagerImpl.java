@@ -43,6 +43,11 @@ public class SQLAsyncEntityManagerImpl<T> extends SQLEntityManagerImpl<T> implem
     }
 
     @Override
+    public @NotNull CompletableFuture<@Nullable T> selectFirstAsync(@NotNull String name, @NotNull Object o) {
+        return CompletableFuture.supplyAsync(() -> selectFirst(name, o), executorService());
+    }
+
+    @Override
     public @NotNull CompletableFuture<@NotNull List<T>> selectAsync(int limit) {
         return CompletableFuture.supplyAsync(() -> select(limit), executorService());
     }

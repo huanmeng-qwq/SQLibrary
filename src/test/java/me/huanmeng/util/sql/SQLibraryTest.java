@@ -5,8 +5,6 @@ import me.huanmeng.util.sql.api.SQLAsyncEntityManager;
 import me.huanmeng.util.sql.api.SQLEntityManager;
 import me.huanmeng.util.sql.api.SQLibrary;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Optional;
 
 /**
@@ -33,15 +31,19 @@ public class SQLibraryTest {
     public void test() {
         SQLEntityManager<UserData> userDataMapper = sqlibrary.manager(UserData.class);
 
+        userDataMapper.setDebug(true);
+        UserData last = userDataMapper.selectFirst("username", "SQLibrary2.0");
+        System.out.println("last: " + last);
+
         // Insert
-        UserData userData = new UserData(null, Arrays.asList("SQLibrary", "SQLibrary2.0"), 18);
+        UserData userData = new UserData(null, "SQLibrary", 18);
         // 这里的UserData的dbId已被自动写入
         UserData insertedUserData = userDataMapper.insert(userData);
         Optional.ofNullable(insertedUserData).ifPresent(e -> System.out.println("dbId: " + insertedUserData.getDbId()));
 
         // Update
         Optional.ofNullable(insertedUserData).ifPresent(e -> {
-            insertedUserData.setUsername(Collections.singletonList("SQLibrary2.0"));
+            insertedUserData.setUsername("SQLibrary2.0");
             userDataMapper.update(insertedUserData);
         });
 
@@ -55,7 +57,7 @@ public class SQLibraryTest {
     public void testAsync() {
         SQLAsyncEntityManager<UserData> asyncUserDataMapper = sqlibrary.manager(UserData.class).async();
 
-        UserData userData = new UserData(null, Arrays.asList("SQLibraryAsync", "SQLibrary2.1"), 18);
+        UserData userData = new UserData(null, "SQLibraryAsync", 18);
         // 这里的UserData的dbId已被自动写入
         // Insert
         // 也可以使用
@@ -67,7 +69,7 @@ public class SQLibraryTest {
 //                    System.out.println(data);
                     // Update
                     Optional.ofNullable(data).ifPresent(e -> {
-                        data.setUsername(Collections.singletonList("SQLibraryAsync2.1"));
+                        data.setUsername("SQLibraryAsync2.1");
                         asyncUserDataMapper.updateAsync(data).join();
                     });
 

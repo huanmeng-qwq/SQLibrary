@@ -35,7 +35,13 @@ public interface SQLEntityManager<T> {
      * @return 结果
      */
     @Nullable
-    T selectFirst(@NotNull String[] name, @NotNull Object... values);
+    T selectFirst(@NotNull String[] name, @Nullable Object... values);
+
+    /**
+     * @param name 字段名
+     * @param o    字段值
+     */
+    @Nullable T selectFirst(@NotNull String name, @NotNull Object o);
 
     /**
      * @param name   字段名
@@ -53,7 +59,7 @@ public interface SQLEntityManager<T> {
      * @see SQLEntityInstance#keyNames()
      */
     @Nullable
-    T selectFirst(@NotNull Object... values);
+    T selectFirst(@Nullable Object... values);
 
     /**
      * 查询N个实体
@@ -83,7 +89,7 @@ public interface SQLEntityManager<T> {
      * @apiNote {@link SQLField#isAutoIncrement()}
      */
     @NotNull
-    List<T> selectAny(int limit, @Nullable SQLOrderData orderData, @NotNull Object... values);
+    List<T> selectAny(int limit, @Nullable SQLOrderData orderData, @Nullable Object... values);
 
     /**
      * 查询1个实体并排序
@@ -94,7 +100,7 @@ public interface SQLEntityManager<T> {
      * @apiNote {@link SQLField#isAutoIncrement()}
      */
     @Nullable
-    T select(@Nullable SQLOrderData orderData, @NotNull Object... values);
+    T select(@Nullable SQLOrderData orderData, @Nullable Object... values);
 
     /**
      * 查询N个实体

@@ -58,6 +58,13 @@ public interface SQLAsyncEntityManager<T> extends SQLEntityManager<T> {
     CompletableFuture<@Nullable T> selectFirstAsync(@NotNull Object... values);
 
     /**
+     * @param name 字段名
+     * @param o    字段值
+     */
+    @NotNull
+    CompletableFuture<@Nullable T> selectFirstAsync(@NotNull String name, @NotNull Object o);
+
+    /**
      * 查询N个实体
      *
      * @param limit 条数
