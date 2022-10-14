@@ -5,6 +5,8 @@ import cc.carm.lib.easysql.api.SQLManager;
 import cc.carm.lib.easysql.manager.SQLManagerImpl;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import me.huanmeng.util.sql.gson.FieldJsonDeserializationContext;
+import me.huanmeng.util.sql.gson.FieldJsonSerializationContext;
 import me.huanmeng.util.sql.impl.SQLEntityInstance;
 import me.huanmeng.util.sql.type.SQLType;
 import me.huanmeng.util.sql.type.SQLTypes;
@@ -29,11 +31,15 @@ public class SQLibrary {
     protected DataSource dataSource;
     protected SQLTypes sqlTypes;
     protected Gson gson;
+    protected FieldJsonSerializationContext fieldJsonSerializationContext;
+    protected FieldJsonDeserializationContext fieldJsonDeserializationContext;
 
     public SQLibrary(@NotNull DataSource dataSource) {
         this.dataSource = dataSource;
         this.sqlTypes = new SQLTypes();
-        this.gson = new GsonBuilder().create();
+        this.gson = new GsonBuilder().disableHtmlEscaping().create();
+        this.fieldJsonSerializationContext = new FieldJsonSerializationContext(this.gson);
+        this.fieldJsonDeserializationContext = new FieldJsonDeserializationContext(this.gson);
     }
 
     /**
@@ -183,6 +189,24 @@ public class SQLibrary {
 
     public SQLibrary sqlTypes(SQLTypes sqlTypes) {
         this.sqlTypes = sqlTypes;
+        return this;
+    }
+
+    public FieldJsonSerializationContext fieldJsonSerializationContext() {
+        return fieldJsonSerializationContext;
+    }
+
+    public SQLibrary fieldJsonSerializationContext(FieldJsonSerializationContext fieldJsonSerializationContext) {
+        this.fieldJsonSerializationContext = fieldJsonSerializationContext;
+        return this;
+    }
+
+    public FieldJsonDeserializationContext fieldJsonDeserializationContext() {
+        return fieldJsonDeserializationContext;
+    }
+
+    public SQLibrary fieldJsonDeserializationContext(FieldJsonDeserializationContext fieldJsonDeserializationContext) {
+        this.fieldJsonDeserializationContext = fieldJsonDeserializationContext;
         return this;
     }
 }

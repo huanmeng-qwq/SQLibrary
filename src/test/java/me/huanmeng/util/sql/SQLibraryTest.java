@@ -64,7 +64,7 @@ public class SQLibraryTest {
                 .handle((data, throwable) -> {
                     Optional.ofNullable(data).ifPresent(e -> System.out.println("dbId: " + data.getDbId()));
 
-                    System.out.println(data);
+//                    System.out.println(data);
                     // Update
                     Optional.ofNullable(data).ifPresent(e -> {
                         data.setUsername(Collections.singletonList("SQLibraryAsync2.1"));

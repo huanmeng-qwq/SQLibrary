@@ -1,9 +1,11 @@
 package me.huanmeng.util.sql.impl;
 
+import com.google.gson.JsonSerializer;
 import me.huanmeng.util.sql.api.SQLTypeParser;
 import me.huanmeng.util.sql.api.SQLibrary;
 import me.huanmeng.util.sql.api.annotation.SQLField;
 import me.huanmeng.util.sql.api.annotation.SQLIgnore;
+import me.huanmeng.util.sql.api.annotation.SQLJson;
 import me.huanmeng.util.sql.type.HutoolAdapter;
 import me.huanmeng.util.sql.type.SQLType;
 import me.huanmeng.util.sql.util.ArrayUtil;
@@ -43,6 +45,10 @@ public class SQLEntityFieldMetaData<I, T> {
     protected SQLField.Order order = SQLField.Order.NONE;
     protected String simpleName;
     protected SQLField.Serialize serialize = SQLField.Serialize.NONE;
+
+    // serialize
+    protected JsonSerializer<?> jsonSerializer;
+
     public static final int MAX_KEY_LENGTH;
     public static final int CHAR_BYTE;
 
@@ -100,7 +106,7 @@ public class SQLEntityFieldMetaData<I, T> {
                         1071 - Specified key was too long; max key length is 767 bytes
                      */
                     if (this.key && this.sqlType.length() * CHAR_BYTE >= MAX_KEY_LENGTH) {
-                        logger.warn("Errors will occur in {} and have been corrected automatically", sqlType.toSQLString());
+                        logger.warn("[{}-{}] Errors will occur in {} and have been corrected automatically", fieldName, simpleName, sqlType.toSQLString());
                         SQLTypeParser<T> sqlTypeParser = sqlType.typeParser();
                         // def: 191=767/4
                         sqlType = new SQLType<T>(sqlType.name(), Math.floorDiv(MAX_KEY_LENGTH, CHAR_BYTE)).typeParser(sqlTypeParser);
@@ -111,6 +117,15 @@ public class SQLEntityFieldMetaData<I, T> {
                 }).orElseGet(() -> {
                     this.fieldName = field.getName();
                     return null;
+                });
+        Optional.ofNullable(field.getAnnotation(SQLJson.class))
+                .map(json -> {
+                    try {
+                        this.jsonSerializer = ReflectUtil.newInstanceIfPossible(json.targetClass());
+                    } catch (Exception e) {
+                        logger.error("SQLJson#targetClass new instance error", e);
+                    }
+                    return json;
                 });
     }
 
@@ -164,8 +179,9 @@ public class SQLEntityFieldMetaData<I, T> {
 
     /**
      * 反序列化字段
+     *
      * @param resultSet 结果集
-     * @param instance 对象实例
+     * @param instance  对象实例
      */
     public void deserialize(ResultSet resultSet, I instance) {
         try {
@@ -243,5 +259,10 @@ public class SQLEntityFieldMetaData<I, T> {
     @NotNull
     public SQLibrary sqlibrary() {
         return sqlibrary;
+    }
+
+    @Nullable
+    public JsonSerializer jsonSerializer() {
+        return jsonSerializer;
     }
 }

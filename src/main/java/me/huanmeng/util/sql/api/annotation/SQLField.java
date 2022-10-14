@@ -1,6 +1,11 @@
 package me.huanmeng.util.sql.api.annotation;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
+import me.huanmeng.util.sql.api.SQLibrary;
 import me.huanmeng.util.sql.impl.SQLEntityFieldMetaData;
 import org.jetbrains.annotations.Nullable;
 
@@ -85,13 +90,29 @@ public @interface SQLField {
         JSON() {
             @Override
             public <T, I> Object serialize(SQLEntityFieldMetaData<T, I> fieldMetaData, Object o) {
-                return fieldMetaData.sqlibrary().gson().toJson(o);
+                Gson gson = fieldMetaData.sqlibrary().gson();
+                if (fieldMetaData.jsonSerializer() != null) {
+                    //noinspection unchecked,ConstantConditions
+                    JsonElement serialize = fieldMetaData.jsonSerializer()
+                            .serialize(o, TypeToken.get(o.getClass()).getType(),
+                                    fieldMetaData.sqlibrary().fieldJsonSerializationContext());
+                    return serialize.toString();
+                }
+                return gson.toJson(o);
             }
 
             @Override
             public <I, T> void deserialize(SQLEntityFieldMetaData<I, T> fieldMetaData, ResultSet resultSet, I instance) throws SQLException {
                 String data = resultSet.getString(fieldMetaData.fieldName());
-                fieldMetaData.setValue(instance, fieldMetaData.sqlibrary().gson().fromJson(data, fieldMetaData.type()));
+                SQLibrary sqlibrary = fieldMetaData.sqlibrary();
+                if (fieldMetaData.jsonSerializer() instanceof JsonDeserializer) {
+                    JsonElement jsonElement = JsonParser.parseString(data);
+                    //noinspection unchecked,ConstantConditions
+                    T deserialize = ((JsonDeserializer<T>) fieldMetaData.jsonSerializer()).deserialize(jsonElement, TypeToken.get(instance.getClass()).getType(), sqlibrary.fieldJsonDeserializationContext());
+                    fieldMetaData.setValue(instance, deserialize);
+                    return;
+                }
+                fieldMetaData.setValue(instance, sqlibrary.gson().fromJson(data, fieldMetaData.type()));
             }
         },
         ;
