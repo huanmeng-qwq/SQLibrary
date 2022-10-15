@@ -155,6 +155,14 @@ public interface SQLEntityManager<T> {
     /**
      * 是否存在这一条数据
      *
+     * @param name 字段名
+     * @param o    字段值
+     */
+    boolean exist(@NotNull String name, @NotNull Object o);
+
+    /**
+     * 是否存在这一条数据
+     *
      * @param entity 实例
      * @apiNote {@link SQLField#id()}
      */

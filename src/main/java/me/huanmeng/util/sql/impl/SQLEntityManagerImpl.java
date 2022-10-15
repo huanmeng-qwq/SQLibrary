@@ -390,6 +390,20 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
         return exist;
     }
 
+    @Override
+    public boolean exist(@NotNull String name, @NotNull Object o) {
+        boolean exist;
+        TableQueryBuilder tableQueryBuilder = holder.sqlManager().createQuery()
+                .inTable(holder.tableName());
+        tableQueryBuilder.addCondition(name, o);
+        try (SQLQuery query = tableQueryBuilder.build().execute()) {
+            exist = query.getResultSet().next();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return exist;
+    }
+
     protected void fillCondition(@NotNull ConditionalBuilder<?, ?> conditionalBuilder, boolean all, @Nullable Object... values) {
         Map<String, Object> map = new LinkedHashMap<>();
         String[] keyNames = holder.keyNames(all);

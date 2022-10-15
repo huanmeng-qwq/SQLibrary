@@ -101,6 +101,11 @@ public class SQLAsyncEntityManagerImpl<T> extends SQLEntityManagerImpl<T> implem
     }
 
     @Override
+    public @NotNull CompletableFuture<@NotNull Boolean> existAsync(@NotNull String name, @NotNull Object o) {
+        return CompletableFuture.supplyAsync(() -> exist(name, o), executorService());
+    }
+
+    @Override
     public @NotNull CompletableFuture<@NotNull Boolean> existAsync(@NotNull T entity) {
         return CompletableFuture.supplyAsync(() -> exist(entity), executorService());
     }
