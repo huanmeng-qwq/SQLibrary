@@ -43,6 +43,11 @@ public class SQLAsyncEntityManagerImpl<T> extends SQLEntityManagerImpl<T> implem
     }
 
     @Override
+    public @NotNull CompletableFuture<@Nullable T> selectFirstByAllFieldAsync(@Nullable Object... values) {
+        return CompletableFuture.supplyAsync(() -> selectFirstByAllField(values), executorService());
+    }
+
+    @Override
     public @NotNull CompletableFuture<@Nullable T> selectFirstAsync(@NotNull String name, @NotNull Object o) {
         return CompletableFuture.supplyAsync(() -> selectFirst(name, o), executorService());
     }
@@ -50,6 +55,16 @@ public class SQLAsyncEntityManagerImpl<T> extends SQLEntityManagerImpl<T> implem
     @Override
     public @NotNull CompletableFuture<@NotNull List<T>> selectAsync(int limit) {
         return CompletableFuture.supplyAsync(() -> select(limit), executorService());
+    }
+
+    @Override
+    public @NotNull CompletableFuture<@NotNull List<T>> selectAnyByFieldAsync(int limit, @Nullable SQLOrderData orderData, @Nullable Object... values) {
+        return CompletableFuture.supplyAsync(() -> selectAnyByField(limit, orderData, values), executorService());
+    }
+
+    @Override
+    public @NotNull CompletableFuture<List<T>> selectAnyByAllFieldAsync(int limit, @Nullable SQLOrderData orderData, @Nullable Object... values) {
+        return CompletableFuture.supplyAsync(() -> selectAllByAllField(limit, orderData, values), executorService());
     }
 
     @Override
@@ -68,8 +83,23 @@ public class SQLAsyncEntityManagerImpl<T> extends SQLEntityManagerImpl<T> implem
     }
 
     @Override
+    public @NotNull CompletableFuture<@Nullable T> selectByFieldAsync(@Nullable SQLOrderData orderData, @Nullable Object... values) {
+        return CompletableFuture.supplyAsync(() -> selectByField(orderData, values), executorService());
+    }
+
+    @Override
+    public @NotNull CompletableFuture<@Nullable T> selectByAllFieldAsync(@Nullable SQLOrderData orderData, @Nullable Object... values) {
+        return CompletableFuture.supplyAsync(() -> selectByAllField(orderData, values), executorService());
+    }
+
+    @Override
     public @NotNull CompletableFuture<@NotNull List<T>> selectAllAsync(@NotNull Object... values) {
         return CompletableFuture.supplyAsync(() -> selectAll(values), executorService());
+    }
+
+    @Override
+    public @NotNull CompletableFuture<@NotNull List<T>> selectAllByAllFieldAsync(@Nullable Object... values) {
+        return CompletableFuture.supplyAsync(() -> selectAllByAllField(values), executorService());
     }
 
     @Override
@@ -116,6 +146,14 @@ public class SQLAsyncEntityManagerImpl<T> extends SQLEntityManagerImpl<T> implem
             delete(values);
             return null;
         }, executorService());
+    }
+
+    @Override
+    public @NotNull CompletableFuture<@Nullable Void> deleteByAllFieldAsync(@NotNull Object... values) {
+        return CompletableFuture.supplyAsync(() -> {
+            deleteByAllField(values);
+            return null;
+        });
     }
 
     @Override

@@ -14,9 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -57,7 +55,7 @@ public class SQLEntityInstance<T> {
                 keys.add(field.fieldName());
             }
             if (field.autoIncrement()) {
-                table.addAutoIncrementColumn(field.fieldName(), false);
+                table.addAutoIncrementColumn(field.fieldName(), true, true);
             } else {
                 table.addColumn(field.fieldName(), field.sqlType().toSQLString());
             }
@@ -81,7 +79,9 @@ public class SQLEntityInstance<T> {
         }
         List<SQLEntityFieldMetaData<T, ?>> notFound = metaData.fields()
                 .stream()
-                .filter(e -> !columns.contains(e.fieldName()))
+                .filter(e -> columns.stream().noneMatch(c ->
+                        Objects.equals(c.toLowerCase(Locale.ROOT), e.fieldName().toLowerCase(Locale.ROOT))
+                ))
                 .collect(Collectors.toList());
         if (!notFound.isEmpty()) {
             TableAlterBuilder tableAlter = sqlManager.alterTable(tableName());
@@ -147,7 +147,7 @@ public class SQLEntityInstance<T> {
 //            return new String[]{fields.get(0).fieldName()};
 //        }
         for (SQLEntityFieldMetaData<T, ?> field : metaData.fields()) {
-            if ((field.key() && !field.autoIncrement()) || all) {
+            if (field.key() && (!field.autoIncrement() || all)) {
                 list.add(field.fieldName());
             }
         }

@@ -21,8 +21,7 @@ public interface SQLAsyncEntityManager<T> extends SQLEntityManager<T> {
     /**
      * 查询1个实体
      *
-     * @param values 条件
-     * @apiNote {@link SQLField#id()}
+     * @param values 条件 所有字段(不包括自增字段)
      * @see SQLEntityInstance#keyNames()
      * @see #selectFirst(Object...)
      * @deprecated
@@ -50,12 +49,20 @@ public interface SQLAsyncEntityManager<T> extends SQLEntityManager<T> {
     /**
      * 查询1个实体
      *
-     * @param values 条件
-     * @apiNote {@link SQLField#id()}
+     * @param values 条件 所有字段(不包括自增字段)
      * @see SQLEntityInstance#keyNames()
      */
     @NotNull
     CompletableFuture<@Nullable T> selectFirstAsync(@NotNull Object... values);
+
+    /**
+     * 查询1个实体
+     *
+     * @param values 条件 所有字段(不包括自增字段)
+     * @see SQLEntityInstance#keyNames()
+     */
+    @NotNull
+    CompletableFuture<@Nullable T> selectFirstByAllFieldAsync(@Nullable Object... values);
 
     /**
      * @param name 字段名
@@ -71,6 +78,32 @@ public interface SQLAsyncEntityManager<T> extends SQLEntityManager<T> {
      */
     @NotNull
     CompletableFuture<@NotNull List<T>> selectAsync(int limit);
+
+    /**
+     * 查询N个实体并排序
+     *
+     * @param limit     条数
+     * @param orderData 排序 可选
+     * @param values    条件 仅自增字段与{@link SQLField#id()}
+     * @apiNote 条件数组是
+     * @apiNote {@link SQLField#id()}
+     * @apiNote {@link SQLField#isAutoIncrement()}
+     */
+    @NotNull
+    CompletableFuture<@NotNull List<T>> selectAnyByFieldAsync(int limit, @Nullable SQLOrderData orderData, @Nullable Object... values);
+
+    /**
+     * 查询N个实体并排序
+     *
+     * @param limit     条数
+     * @param orderData 排序 可选
+     * @param values    条件 所有字段
+     * @apiNote 条件数组是
+     * @apiNote {@link SQLField#id()}
+     * @apiNote {@link SQLField#isAutoIncrement()}
+     */
+    @NotNull
+    CompletableFuture<@NotNull List<T>> selectAnyByAllFieldAsync(int limit, @Nullable SQLOrderData orderData, @Nullable Object... values);
 
     /**
      * 查询N个实体并排序
@@ -98,7 +131,7 @@ public interface SQLAsyncEntityManager<T> extends SQLEntityManager<T> {
      * 查询1个实体并排序
      *
      * @param orderData 排序 可选
-     * @param values    条件
+     * @param values    条件 仅自增字段与{@link SQLField#id()}
      * @apiNote {@link SQLField#id()}
      * @apiNote {@link SQLField#isAutoIncrement()}
      */
@@ -106,13 +139,44 @@ public interface SQLAsyncEntityManager<T> extends SQLEntityManager<T> {
     CompletableFuture<@Nullable T> selectAsync(@Nullable SQLOrderData orderData, @NotNull Object... values);
 
     /**
+     * 查询1个实体并排序
+     *
+     * @param orderData 排序 可选
+     * @param values    条件 所有字段(不包括自增字段)
+     * @apiNote {@link SQLField#id()}
+     * @apiNote {@link SQLField#isAutoIncrement()}
+     */
+    @NotNull
+    CompletableFuture<@Nullable T> selectByFieldAsync(@Nullable SQLOrderData orderData, @Nullable Object... values);
+
+    /**
+     * 查询1个实体并排序
+     *
+     * @param orderData 排序 可选
+     * @param values    条件 所有字段
+     * @apiNote {@link SQLField#id()}
+     * @apiNote {@link SQLField#isAutoIncrement()}
+     */
+    @NotNull
+    CompletableFuture<@Nullable T> selectByAllFieldAsync(@Nullable SQLOrderData orderData, @Nullable Object... values);
+
+    /**
      * 查询N个实体
      *
-     * @param values 条件
+     * @param values 条件 所有字段(不包括自增字段)
      * @apiNote {@link SQLField#id()}
      */
     @NotNull
     CompletableFuture<@NotNull List<T>> selectAllAsync(@NotNull Object... values);
+
+    /**
+     * 查询N个实体
+     *
+     * @param values 条件 所有字段
+     * @apiNote {@link SQLField#id()}
+     */
+    @NotNull
+    CompletableFuture<@NotNull List<T>> selectAllByAllFieldAsync(@Nullable Object... values);
 
     /**
      * 查询所有实体
@@ -151,7 +215,7 @@ public interface SQLAsyncEntityManager<T> extends SQLEntityManager<T> {
     /**
      * 是否存在这一条数据
      *
-     * @param values 条件
+     * @param values 条件 仅自增字段
      * @apiNote {@link SQLField#id()}
      */
     @NotNull
@@ -177,6 +241,10 @@ public interface SQLAsyncEntityManager<T> extends SQLEntityManager<T> {
 
     /**
      * 删除一个数据
+     * <p>
+     * 不传参将删除所有的数据！！！！！！！！！！！！
+     * 不传参将删除所有的数据！！！！！！！！！！！！
+     * 不传参将删除所有的数据！！！！！！！！！！！！
      *
      * @param values 条件
      * @apiNote {@link SQLField#id()}
@@ -184,6 +252,19 @@ public interface SQLAsyncEntityManager<T> extends SQLEntityManager<T> {
      */
     @NotNull
     CompletableFuture<@Nullable Void> deleteAsync(@NotNull Object... values);
+
+    /**
+     * 删除一个数据
+     * <p>
+     * 不传参将删除所有的数据！！！！！！！！！！！！
+     * 不传参将删除所有的数据！！！！！！！！！！！！
+     * 不传参将删除所有的数据！！！！！！！！！！！！
+     *
+     * @param values 条件 所有字段
+     * @see #delete(T)
+     */
+    @NotNull
+    CompletableFuture<@Nullable Void> deleteByAllFieldAsync(@NotNull Object... values);
 
     /**
      * 删除一条数据

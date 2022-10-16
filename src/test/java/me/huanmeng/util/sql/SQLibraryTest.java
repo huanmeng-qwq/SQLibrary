@@ -1,95 +1,81 @@
 package me.huanmeng.util.sql;
 
 import cc.carm.lib.easysql.beecp.BeeDataSource;
-import me.huanmeng.util.sql.api.SQLAsyncEntityManager;
-import me.huanmeng.util.sql.api.SQLEntityManager;
+import cc.carm.lib.easysql.beecp.BeeDataSourceConfig;
 import me.huanmeng.util.sql.api.SQLibrary;
+import me.huanmeng.util.sql.handlers.*;
+import org.jetbrains.annotations.NotNull;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * 2022/10/2<br>
  * SQLibrary<br>
+ * 使用了EasySQl相同的测试风格
  *
  * @author huanmeng_qwq
  */
 public class SQLibraryTest {
-    private final SQLibrary sqlibrary;
+    protected SQLibrary sqlibrary;
 
-    public SQLibraryTest() {
-        // 修改为自己的数据库连接信息
-        sqlibrary = new SQLibrary(new BeeDataSource("com.mysql.cj.jdbc.Driver", "jdbc:mysql://localhost:857/test",
-                "root", "123456"));
-        test();
-//        testAsync();
+    public static void print(@NotNull String format, Object... params) {
+        System.out.printf((format) + "%n", params);
     }
 
-    public static void main(String[] args) {
-        new SQLibraryTest();
+    @Before
+    public void initialize() {
+        BeeDataSourceConfig config = new BeeDataSourceConfig();
+        config.setDriverClassName("org.h2.Driver");
+        config.setJdbcUrl("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;MODE=MYSQL;");
+        sqlibrary = new SQLibrary(new BeeDataSource(config));
     }
 
+    @Test
     public void test() {
-        SQLEntityManager<UserData> userDataMapper = sqlibrary.manager(UserData.class);
+        print("加载测试类...");
+        Set<SQLTestHandler> tests = new LinkedHashSet<>();
+        tests.add(new InsertData());
+        tests.add(new Exist());
+        tests.add(new Select());
+        tests.add(new SelectFirst());
+        tests.add(new SelectAll());
+        tests.add(new SelectAny());
+        tests.add(new Update());
+        tests.add(new Delete());
+        print("准备进行测试...");
 
-        userDataMapper.setDebug(true);
-        List<UserData> last = userDataMapper.selectAny(10, null, null, "SQLibraryAsync2.1");
-        for (UserData userData : last) {
-            System.out.println(userData);
+        int index = 1;
+        int success = 0;
+
+        for (SQLTestHandler currentTest : tests) {
+            print("-------------------------------------------------");
+            if (currentTest.executeTest(index, sqlibrary)) {
+                success++;
+            }
+
+            index++;
+            try {
+                Thread.sleep(1000L);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
         }
-        if(true){
-            return;
-        }
 
-        // Insert
-        UserData userData = new UserData(null, "SQLibrary", 18);
-        // 这里的UserData的dbId已被自动写入
-        UserData insertedUserData = userDataMapper.insert(userData);
-        Optional.ofNullable(insertedUserData).ifPresent(e -> System.out.println("dbId: " + insertedUserData.getDbId()));
-
-        // Update
-        Optional.ofNullable(insertedUserData).ifPresent(e -> {
-            insertedUserData.setUsername("SQLibrary2.0");
-            userDataMapper.update(insertedUserData);
-        });
-
-        // Select
-        Optional.ofNullable(insertedUserData).ifPresent(e -> {
-            UserData selectUserData = userDataMapper.selectFirst(insertedUserData.getDbId());
-            Optional.ofNullable(selectUserData).ifPresent(select -> System.out.println("userName: " + selectUserData.getUsername()));
-        });
+        print(" ");
+        print("全部测试执行完毕，成功 %s 个，失败 %s 个。",
+                success, (tests.size() - success)
+        );
     }
 
-    public void testAsync() {
-        SQLAsyncEntityManager<UserData> asyncUserDataMapper = sqlibrary.manager(UserData.class).async();
-
-        UserData userData = new UserData(null, "SQLibraryAsync", 18);
-        // 这里的UserData的dbId已被自动写入
-        // Insert
-        // 也可以使用
-        // UserData insertedUserData asyncUserDataMapper.insertAsync(userData).get();
-        asyncUserDataMapper.insertAsync(userData)
-                .handle((data, throwable) -> {
-                    Optional.ofNullable(data).ifPresent(e -> System.out.println("dbId: " + data.getDbId()));
-
-//                    System.out.println(data);
-                    // Update
-                    Optional.ofNullable(data).ifPresent(e -> {
-                        data.setUsername("SQLibraryAsync2.1");
-                        asyncUserDataMapper.updateAsync(data).join();
-                    });
-
-                    // Select
-                    Optional.ofNullable(data).ifPresent(e -> {
-                        asyncUserDataMapper.selectFirstAsync(data.getDbId())
-                                .whenComplete((selectUserData, throwable1) -> {
-                                    Optional.ofNullable(selectUserData).ifPresent(select -> System.out.println("userName: " + selectUserData.getUsername()));
-                                })
-                                .join();
-                    });
-                    assert data != null;
-                    return asyncUserDataMapper.selectFirstAsync(data.getDbId());
-                }).join();
-
+    @After
+    public void shutdown() {
+        sqlibrary.removeAll();
     }
+
+
 }

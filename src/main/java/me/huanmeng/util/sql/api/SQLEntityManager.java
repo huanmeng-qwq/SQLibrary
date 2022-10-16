@@ -19,8 +19,7 @@ public interface SQLEntityManager<T> {
     /**
      * 查询1个实体
      *
-     * @param values 条件
-     * @apiNote {@link SQLField#id()}
+     * @param values 条件 所有字段(不包括自增字段)
      * @see SQLEntityInstance#keyNames()
      * @see #selectFirst(Object...)
      * @deprecated
@@ -54,12 +53,20 @@ public interface SQLEntityManager<T> {
     /**
      * 查询1个实体
      *
-     * @param values 条件
-     * @apiNote {@link SQLField#id()}
+     * @param values 条件 所有字段(不包括自增字段)
      * @see SQLEntityInstance#keyNames()
      */
     @Nullable
     T selectFirst(@Nullable Object... values);
+
+    /**
+     * 查询1个实体
+     *
+     * @param values 条件 所有字段(不包括自增字段)
+     * @see SQLEntityInstance#keyNames()
+     */
+    @Nullable
+    T selectFirstByAllField(@Nullable Object... values);
 
     /**
      * 查询N个实体
@@ -83,7 +90,7 @@ public interface SQLEntityManager<T> {
      *
      * @param limit     条数
      * @param orderData 排序 可选
-     * @param values    条件
+     * @param values    条件 仅自增字段与{@link SQLField#id()}
      * @apiNote 条件数组是
      * @apiNote {@link SQLField#id()}
      * @apiNote {@link SQLField#isAutoIncrement()}
@@ -92,10 +99,36 @@ public interface SQLEntityManager<T> {
     List<T> selectAny(int limit, @Nullable SQLOrderData orderData, @Nullable Object... values);
 
     /**
+     * 查询N个实体并排序
+     *
+     * @param limit     条数
+     * @param orderData 排序 可选
+     * @param values    条件 所有字段(不包括自增字段)
+     * @apiNote 条件数组是
+     * @apiNote {@link SQLField#id()}
+     * @apiNote {@link SQLField#isAutoIncrement()}
+     */
+    @NotNull
+    List<T> selectAnyByField(int limit, @Nullable SQLOrderData orderData, @Nullable Object... values);
+
+    /**
+     * 查询N个实体并排序
+     *
+     * @param limit     条数
+     * @param orderData 排序 可选
+     * @param values    条件 所有字段
+     * @apiNote 条件数组是
+     * @apiNote {@link SQLField#id()}
+     * @apiNote {@link SQLField#isAutoIncrement()}
+     */
+    @NotNull
+    List<T> selectAnyByAllField(int limit, @Nullable SQLOrderData orderData, @Nullable Object... values);
+
+    /**
      * 查询1个实体并排序
      *
      * @param orderData 排序 可选
-     * @param values    条件
+     * @param values    条件 仅自增字段与{@link SQLField#id()}
      * @apiNote {@link SQLField#id()}
      * @apiNote {@link SQLField#isAutoIncrement()}
      */
@@ -103,13 +136,44 @@ public interface SQLEntityManager<T> {
     T select(@Nullable SQLOrderData orderData, @Nullable Object... values);
 
     /**
+     * 查询1个实体并排序
+     *
+     * @param orderData 排序 可选
+     * @param values    条件 所有字段(不包括自增字段)
+     * @apiNote {@link SQLField#id()}
+     * @apiNote {@link SQLField#isAutoIncrement()}
+     */
+    @Nullable
+    T selectByField(@Nullable SQLOrderData orderData, @Nullable Object... values);
+
+    /**
+     * 查询1个实体并排序
+     *
+     * @param orderData 排序 可选
+     * @param values    条件 所有字段
+     * @apiNote {@link SQLField#id()}
+     * @apiNote {@link SQLField#isAutoIncrement()}
+     */
+    @Nullable
+    T selectByAllField(@Nullable SQLOrderData orderData, @Nullable Object... values);
+
+    /**
      * 查询N个实体
      *
-     * @param values 条件
+     * @param values 条件 所有字段(不包括自增字段)
      * @apiNote {@link SQLField#id()}
      */
     @NotNull
-    List<T> selectAll(@NotNull Object... values);
+    List<T> selectAll(@Nullable Object... values);
+
+    /**
+     * 查询N个实体
+     *
+     * @param values 条件 所有字段
+     * @apiNote {@link SQLField#id()}
+     */
+    @NotNull
+    List<T> selectAllByAllField(@Nullable Object... values);
 
     /**
      * 查询所有实体
@@ -147,10 +211,26 @@ public interface SQLEntityManager<T> {
     /**
      * 是否存在这一条数据
      *
-     * @param values 条件
+     * @param values 条件 仅自增字段
      * @apiNote {@link SQLField#id()}
      */
-    boolean exist(@NotNull Object... values);
+    boolean exist(@Nullable Object... values);
+
+    /**
+     * 是否存在这一条数据
+     *
+     * @param values 条件 所有字段(不包括自增字段)
+     * @apiNote {@link SQLField#id()}
+     */
+    boolean existByField(@Nullable Object... values);
+
+    /**
+     * 是否存在这一条数据
+     *
+     * @param values 条件 所有字段
+     * @apiNote {@link SQLField#id()}
+     */
+    boolean existByAllField(@Nullable Object... values);
 
     /**
      * 是否存在这一条数据
@@ -170,12 +250,27 @@ public interface SQLEntityManager<T> {
 
     /**
      * 删除一个数据
+     * <p>
+     * 不传参将删除所有的数据！！！！！！！！！！！！
+     * 不传参将删除所有的数据！！！！！！！！！！！！
+     * 不传参将删除所有的数据！！！！！！！！！！！！
      *
-     * @param values 条件
-     * @apiNote {@link SQLField#id()}
+     * @param values 条件 所有字段(不包括自增字段)
      * @see #delete(T)
      */
     void delete(@NotNull Object... values);
+
+    /**
+     * 删除一个数据
+     * <p>
+     * 不传参将删除所有的数据！！！！！！！！！！！！
+     * 不传参将删除所有的数据！！！！！！！！！！！！
+     * 不传参将删除所有的数据！！！！！！！！！！！！
+     *
+     * @param values 条件 所有字段
+     * @see #delete(T)
+     */
+    void deleteByAllField(@NotNull Object... values);
 
     /**
      * 删除一条数据

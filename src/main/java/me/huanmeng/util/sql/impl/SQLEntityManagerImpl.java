@@ -101,10 +101,15 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
         return selectFirst(false, values);
     }
 
+    @Override
+    public @Nullable T selectFirstByAllField(@Nullable Object... values) {
+        return selectFirst(true, values);
+    }
+
     public T selectFirst(boolean all, @NotNull Object... values) {
         TableQueryBuilder tableQueryBuilder = holder.sqlManager().createQuery()
                 .inTable(holder.tableName()).setLimit(1);
-        fillCondition(tableQueryBuilder, all, values);
+        fillCondition(tableQueryBuilder, holder.names(all), values);
         SQLOrderData orderData = holder.metaData().orderData();
         if (orderData != null) {
             tableQueryBuilder.orderBy(orderData.name(), orderData.asc());
@@ -145,6 +150,42 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
             tableQueryBuilder.orderBy(orderData.name(), orderData.asc());
         }
         fillCondition(tableQueryBuilder, true, values);
+        try (SQLQuery query = tableQueryBuilder.build().execute()) {
+            if (query.getResultSet().next()) {
+                return transform(query.getResultSet());
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
+
+    @Override
+    public @Nullable T selectByField(@Nullable SQLOrderData orderData, @Nullable Object... values) {
+        TableQueryBuilder tableQueryBuilder = holder.sqlManager().createQuery()
+                .inTable(holder.tableName());
+        if (orderData != null) {
+            tableQueryBuilder.orderBy(orderData.name(), orderData.asc());
+        }
+        fillCondition(tableQueryBuilder, holder.names(false), values);
+        try (SQLQuery query = tableQueryBuilder.build().execute()) {
+            if (query.getResultSet().next()) {
+                return transform(query.getResultSet());
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
+
+    @Override
+    public @Nullable T selectByAllField(@Nullable SQLOrderData orderData, @Nullable Object... values) {
+        TableQueryBuilder tableQueryBuilder = holder.sqlManager().createQuery()
+                .inTable(holder.tableName());
+        if (orderData != null) {
+            tableQueryBuilder.orderBy(orderData.name(), orderData.asc());
+        }
+        fillCondition(tableQueryBuilder, holder.names(true), values);
         try (SQLQuery query = tableQueryBuilder.build().execute()) {
             if (query.getResultSet().next()) {
                 return transform(query.getResultSet());
@@ -204,10 +245,78 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     }
 
     @Override
+    public @NotNull List<T> selectAnyByField(int limit, @Nullable SQLOrderData orderData, @Nullable Object... values) {
+        SQLEntityMetaData<T> metaData = holder.metaData();
+        TableQueryBuilder tableQueryBuilder = holder.sqlManager().createQuery()
+                .inTable(holder.tableName())
+                .setLimit(limit);
+
+        if (orderData != null) {
+            tableQueryBuilder.orderBy(orderData.name(), orderData.asc());
+        } else {
+            SQLOrderData sqlOrderData = metaData.orderData();
+            if (sqlOrderData != null) {
+                tableQueryBuilder.orderBy(sqlOrderData.name(), sqlOrderData.asc());
+            }
+        }
+        fillCondition(tableQueryBuilder, holder.names(false), values);
+        ArrayList<T> ts = new ArrayList<>();
+        try (SQLQuery query = tableQueryBuilder.build().execute()) {
+            transformToList(ts, query.getResultSet());
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return ts;
+    }
+
+    @Override
+    public @NotNull List<T> selectAnyByAllField(int limit, @Nullable SQLOrderData orderData, @Nullable Object... values) {
+        SQLEntityMetaData<T> metaData = holder.metaData();
+        TableQueryBuilder tableQueryBuilder = holder.sqlManager().createQuery()
+                .inTable(holder.tableName())
+                .setLimit(limit);
+
+        if (orderData != null) {
+            tableQueryBuilder.orderBy(orderData.name(), orderData.asc());
+        } else {
+            SQLOrderData sqlOrderData = metaData.orderData();
+            if (sqlOrderData != null) {
+                tableQueryBuilder.orderBy(sqlOrderData.name(), sqlOrderData.asc());
+            }
+        }
+        fillCondition(tableQueryBuilder, holder.names(true), values);
+        ArrayList<T> ts = new ArrayList<>();
+        try (SQLQuery query = tableQueryBuilder.build().execute()) {
+            transformToList(ts, query.getResultSet());
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return ts;
+    }
+
+    @Override
     public @NotNull List<T> selectAll(Object... values) {
         TableQueryBuilder tableQueryBuilder = holder.sqlManager().createQuery()
                 .inTable(holder.tableName());
-        fillCondition(tableQueryBuilder, false, values);
+        fillCondition(tableQueryBuilder, holder.names(false), values);
+        SQLOrderData orderData = holder.metaData().orderData();
+        if (orderData != null) {
+            tableQueryBuilder.orderBy(orderData.name(), orderData.asc());
+        }
+        ArrayList<T> ts = new ArrayList<>();
+        try (SQLQuery query = tableQueryBuilder.build().execute()) {
+            transformToList(ts, query.getResultSet());
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return ts;
+    }
+
+    @Override
+    public @NotNull List<T> selectAllByAllField(@Nullable Object... values) {
+        TableQueryBuilder tableQueryBuilder = holder.sqlManager().createQuery()
+                .inTable(holder.tableName());
+        fillCondition(tableQueryBuilder, holder.names(true), values);
         SQLOrderData orderData = holder.metaData().orderData();
         if (orderData != null) {
             tableQueryBuilder.orderBy(orderData.name(), orderData.asc());
@@ -306,7 +415,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
         boolean exist;
         TableQueryBuilder tableQueryBuilder = holder.sqlManager().createQuery()
                 .inTable(holder.tableName());
-        fillCondition(tableQueryBuilder, false, holder.values(entity));
+        fillCondition(tableQueryBuilder, holder.names(false), holder.values(entity));
         try (SQLQuery query = tableQueryBuilder
                 .build()
                 .execute()) {
@@ -331,7 +440,21 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
 
     @Override
     public @Nullable T select(@NotNull T userData) {
-        return selectFirst(true, holder.keyValues(userData, true));
+        TableQueryBuilder tableQueryBuilder = holder.sqlManager().createQuery()
+                .inTable(holder.tableName()).setLimit(1);
+        fillCondition(tableQueryBuilder, holder.names(false), holder.values(userData));
+        SQLOrderData orderData = holder.metaData().orderData();
+        if (orderData != null) {
+            tableQueryBuilder.orderBy(orderData.name(), orderData.asc());
+        }
+        try (SQLQuery query = tableQueryBuilder.build().execute()) {
+            if (query.getResultSet().next()) {
+                return transform(query.getResultSet());
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
     }
 
     @Override
@@ -369,7 +492,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     public void delete(@NotNull Object @NotNull ... values) {
         try {
             DeleteBuilder deleteBuilder = holder.sqlManager().createDelete(holder.tableName());
-            fillCondition(deleteBuilder, false, values);
+            fillCondition(deleteBuilder, holder.names(false), values);
             deleteBuilder.build().execute();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -377,11 +500,50 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     }
 
     @Override
-    public boolean exist(@NotNull Object @NotNull ... values) {
+    public void deleteByAllField(@NotNull Object... values) {
+        try {
+            DeleteBuilder deleteBuilder = holder.sqlManager().createDelete(holder.tableName());
+            fillCondition(deleteBuilder, holder.names(true), values);
+            deleteBuilder.build().execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public boolean exist(@Nullable Object... values) {
         boolean exist;
         TableQueryBuilder tableQueryBuilder = holder.sqlManager().createQuery()
                 .inTable(holder.tableName());
         fillCondition(tableQueryBuilder, false, values);
+        try (SQLQuery query = tableQueryBuilder.build().execute()) {
+            exist = query.getResultSet().next();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return exist;
+    }
+
+    @Override
+    public boolean existByField(@Nullable Object... values) {
+        boolean exist;
+        TableQueryBuilder tableQueryBuilder = holder.sqlManager().createQuery()
+                .inTable(holder.tableName());
+        fillCondition(tableQueryBuilder, holder.names(false), values);
+        try (SQLQuery query = tableQueryBuilder.build().execute()) {
+            exist = query.getResultSet().next();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return exist;
+    }
+
+    @Override
+    public boolean existByAllField(@Nullable Object... values) {
+        boolean exist;
+        TableQueryBuilder tableQueryBuilder = holder.sqlManager().createQuery()
+                .inTable(holder.tableName());
+        fillCondition(tableQueryBuilder, holder.names(true), values);
         try (SQLQuery query = tableQueryBuilder.build().execute()) {
             exist = query.getResultSet().next();
         } catch (SQLException e) {
@@ -405,9 +567,12 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     }
 
     protected void fillCondition(@NotNull ConditionalBuilder<?, ?> conditionalBuilder, boolean all, @Nullable Object... values) {
+        fillCondition(conditionalBuilder, holder.keyNames(all), values);
+    }
+
+    protected void fillCondition(@NotNull ConditionalBuilder<?, ?> conditionalBuilder, String[] names, @Nullable Object... values) {
         Map<String, Object> map = new LinkedHashMap<>();
-        String[] keyNames = holder.keyNames(all);
-        for (int i = 0; i < keyNames.length; i++) {
+        for (int i = 0; i < names.length; i++) {
             if (i >= values.length) {
                 break;
             }
@@ -415,7 +580,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
             if (value == null) {
                 continue;
             }
-            map.put(keyNames[i], value);
+            map.put(names[i], value);
         }
         conditionalBuilder.addCondition(map.keySet().toArray(new String[0]), map.values().toArray());
     }

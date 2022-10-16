@@ -9,6 +9,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * 2022/10/2<br>
@@ -53,6 +54,19 @@ public class UserData {
 
     public void setAge(Integer age) {
         this.age = age;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof UserData)) return false;
+        UserData userData = (UserData) o;
+        return Objects.equals(dbId, userData.dbId) && Objects.equals(username, userData.username) && Objects.equals(age, userData.age);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(dbId, username, age);
     }
 
     @Override
