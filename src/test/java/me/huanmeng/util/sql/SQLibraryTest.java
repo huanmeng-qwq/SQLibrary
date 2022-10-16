@@ -5,6 +5,7 @@ import me.huanmeng.util.sql.api.SQLAsyncEntityManager;
 import me.huanmeng.util.sql.api.SQLEntityManager;
 import me.huanmeng.util.sql.api.SQLibrary;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -21,7 +22,7 @@ public class SQLibraryTest {
         sqlibrary = new SQLibrary(new BeeDataSource("com.mysql.cj.jdbc.Driver", "jdbc:mysql://localhost:857/test",
                 "root", "123456"));
         test();
-        testAsync();
+//        testAsync();
     }
 
     public static void main(String[] args) {
@@ -32,8 +33,13 @@ public class SQLibraryTest {
         SQLEntityManager<UserData> userDataMapper = sqlibrary.manager(UserData.class);
 
         userDataMapper.setDebug(true);
-        UserData last = userDataMapper.selectFirst("username", "SQLibrary2.0");
-        System.out.println("last: " + last);
+        List<UserData> last = userDataMapper.selectAny(10, null, null, "SQLibraryAsync2.1");
+        for (UserData userData : last) {
+            System.out.println(userData);
+        }
+        if(true){
+            return;
+        }
 
         // Insert
         UserData userData = new UserData(null, "SQLibrary", 18);

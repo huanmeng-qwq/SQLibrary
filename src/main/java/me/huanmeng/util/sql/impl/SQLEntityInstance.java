@@ -142,12 +142,12 @@ public class SQLEntityInstance<T> {
     @NotNull
     public String[] keyNames(boolean all) {
         final ArrayList<String> list = new ArrayList<>();
-        List<SQLEntityFieldMetaData<T, Object>> fields = metaData.getAutoIncrementFields();
-        if (fields.size() == 1 && fields.get(0).key() && fields.get(0).autoIncrement()) {
-            return new String[]{fields.get(0).fieldName()};
-        }
+//        List<SQLEntityFieldMetaData<T, Object>> fields = metaData.getAutoIncrementFields();
+//        if (fields.size() == 1 && fields.get(0).key() && fields.get(0).autoIncrement()) {
+//            return new String[]{fields.get(0).fieldName()};
+//        }
         for (SQLEntityFieldMetaData<T, ?> field : metaData.fields()) {
-            if (field.key() && (!field.autoIncrement() || all)) {
+            if ((field.key() && !field.autoIncrement()) || all) {
                 list.add(field.fieldName());
             }
         }

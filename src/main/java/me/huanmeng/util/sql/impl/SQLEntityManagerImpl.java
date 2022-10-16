@@ -179,7 +179,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     }
 
     @Override
-    public @NotNull List<T> selectAny(int limit, SQLOrderData orderData, @NotNull Object @NotNull ... values) {
+    public @NotNull List<T> selectAny(int limit, SQLOrderData orderData, @Nullable Object... values) {
         SQLEntityMetaData<T> metaData = holder.metaData();
         TableQueryBuilder tableQueryBuilder = holder.sqlManager().createQuery()
                 .inTable(holder.tableName())
