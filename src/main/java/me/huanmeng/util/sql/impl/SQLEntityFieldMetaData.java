@@ -1,5 +1,6 @@
 package me.huanmeng.util.sql.impl;
 
+import cc.carm.lib.easysql.api.enums.IndexType;
 import com.google.gson.JsonSerializer;
 import me.huanmeng.util.sql.api.SQLTypeParser;
 import me.huanmeng.util.sql.api.SQLibrary;
@@ -45,6 +46,7 @@ public class SQLEntityFieldMetaData<I, T> {
     protected SQLField.Order order = SQLField.Order.NONE;
     protected String simpleName;
     protected SQLField.Serialize serialize = SQLField.Serialize.NONE;
+    protected IndexType indexType = IndexType.UNIQUE_KEY;
 
     // serialize
     protected JsonSerializer<?> jsonSerializer;
@@ -72,6 +74,10 @@ public class SQLEntityFieldMetaData<I, T> {
         init();
     }
 
+    public IndexType indexType() {
+        return indexType;
+    }
+
     /**
      * 初始化
      */
@@ -89,6 +95,7 @@ public class SQLEntityFieldMetaData<I, T> {
                         this.fieldName = f.value();
                     }
                     this.order = f.orderBy();
+                    this.indexType = f.index();
                     this.key = f.id();
                     if (!f.sqlType().trim().isEmpty()) {
                         String[] split = f.sqlType().split(",");

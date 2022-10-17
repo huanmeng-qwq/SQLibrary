@@ -40,6 +40,7 @@ public class SQLibraryTest {
         Set<SQLTestHandler> tests = new LinkedHashSet<>();
         tests.add(new InsertData());
         tests.add(new Exist());
+//        tests.add(new Custom());
         tests.add(new Select());
         tests.add(new SelectFirst());
         tests.add(new SelectAll());

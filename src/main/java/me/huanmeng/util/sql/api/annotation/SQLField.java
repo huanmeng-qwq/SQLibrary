@@ -1,5 +1,6 @@
 package me.huanmeng.util.sql.api.annotation;
 
+import cc.carm.lib.easysql.api.enums.IndexType;
 import com.google.gson.Gson;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
@@ -37,6 +38,11 @@ public @interface SQLField {
      * 自增id
      */
     boolean isAutoIncrement() default false;
+
+    /**
+     * {@link IndexType}
+     */
+    IndexType index() default IndexType.UNIQUE_KEY;
 
     /**
      * 数据类型<br>

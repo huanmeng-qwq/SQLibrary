@@ -67,6 +67,11 @@ public class SQLEntityInstance<T> {
         } else if (keys.size() >= 2) {
             table.setIndex(IndexType.PRIMARY_KEY, null, keys.remove(0), keys.toArray(new String[0]));
         }
+        for (SQLEntityFieldMetaData<T, Object> field : metaData.fields()) {
+            if (keys.contains(field.fieldName())) {
+                table.setIndex(field.fieldName(), field.indexType());
+            }
+        }
         table.setTableSettings("ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
         table.build().execute();
 
