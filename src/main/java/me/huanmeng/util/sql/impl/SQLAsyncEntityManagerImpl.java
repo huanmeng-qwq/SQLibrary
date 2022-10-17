@@ -3,13 +3,14 @@ package me.huanmeng.util.sql.impl;
 import cc.carm.lib.easysql.api.SQLManager;
 import me.huanmeng.util.sql.api.SQLAsyncEntityManager;
 import me.huanmeng.util.sql.api.SQLOrderData;
+import me.huanmeng.util.sql.util.BiConsumerThrowable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
-import java.util.function.BiConsumer;
 
 /**
  * 2022/10/7<br>
@@ -170,7 +171,7 @@ public class SQLAsyncEntityManagerImpl<T> extends SQLEntityManagerImpl<T> implem
     }
 
     @Override
-    public @NotNull CompletableFuture<@Nullable Void> customAsync(@NotNull BiConsumer<SQLManager, SQLEntityInstance<T>> run) {
+    public @NotNull CompletableFuture<@Nullable Void> customAsync(@NotNull BiConsumerThrowable<SQLManager, SQLEntityInstance<T>, SQLException> run) {
         return CompletableFuture.supplyAsync(() -> {
             custom(run);
             return null;

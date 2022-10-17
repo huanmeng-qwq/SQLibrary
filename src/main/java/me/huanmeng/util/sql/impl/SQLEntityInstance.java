@@ -1,10 +1,8 @@
 package me.huanmeng.util.sql.impl;
 
 import cc.carm.lib.easysql.api.SQLManager;
-import cc.carm.lib.easysql.api.builder.TableAlterBuilder;
 import cc.carm.lib.easysql.api.builder.TableCreateBuilder;
 import cc.carm.lib.easysql.api.enums.IndexType;
-import cc.carm.lib.easysql.api.enums.NumberType;
 import me.huanmeng.util.sql.api.SQLEntityManager;
 import me.huanmeng.util.sql.api.SQLibrary;
 import me.huanmeng.util.sql.api.annotation.SQLField;
@@ -16,7 +14,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 /**
  * 2022/1/29<br>
@@ -76,33 +73,23 @@ public class SQLEntityInstance<T> {
         table.build().execute();
 
         // alter - 如果之前的表的结构类型不一致则自动转换为一致.
-        Set<String> columns;
+        Set<String> dbColumns;
         try {
-            columns = sqlManager.fetchTableMetadata(tableName()).listColumns().get();
+            dbColumns = sqlManager.fetchTableMetadata(tableName()).listColumns().get();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
-        List<SQLEntityFieldMetaData<T, ?>> notFound = metaData.fields()
-                .stream()
-                .filter(e -> columns.stream().noneMatch(c ->
-                        Objects.equals(c.toLowerCase(Locale.ROOT), e.fieldName().toLowerCase(Locale.ROOT))
-                ))
-                .collect(Collectors.toList());
-        if (!notFound.isEmpty()) {
-            TableAlterBuilder tableAlter = sqlManager.alterTable(tableName());
-            for (SQLEntityFieldMetaData<T, ?> field : notFound) {
-                if (field.autoIncrement()) {
-                    tableAlter.addAutoIncrementColumn(field.fieldName(), NumberType.INT).execute();
-                } else {
-                    tableAlter.addColumn(field.fieldName(), field.sqlType().toSQLString()).execute();
-                }
+        Map<String, SQLEntityFieldMetaData<T, ?>> columnRemap = new LinkedHashMap<>(dbColumns.size());
+        Set<String> dropColumns = new LinkedHashSet<>();
+        for (String column : dbColumns) {
+            SQLEntityFieldMetaData<T, Object> field = metaData.getField(column);
+            if (field == null) {
+                columnRemap.put(column, field);
+                continue;
             }
-            if (alterList.size() == 1 && notFound.stream().anyMatch(e -> e.fieldName().equals(alterList.get(0)))) {
-                tableAlter.addIndex(IndexType.PRIMARY_KEY, null, alterList.remove(0)).execute();
-            } else if (alterList.size() >= 2 && notFound.stream().anyMatch(e -> e.fieldName().equals(alterList.get(0)))) {
-                tableAlter.addIndex(IndexType.PRIMARY_KEY, null, alterList.remove(0), alterList.toArray(new String[0])).execute();
-            }
+            dbColumns.add(column);
         }
+
     }
 
     /**

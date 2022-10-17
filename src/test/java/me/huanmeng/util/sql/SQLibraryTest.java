@@ -31,6 +31,8 @@ public class SQLibraryTest {
         BeeDataSourceConfig config = new BeeDataSourceConfig();
         config.setDriverClassName("org.h2.Driver");
         config.setJdbcUrl("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;MODE=MYSQL;");
+//        config.setJdbcUrl("com.mysql.cj.jdbc.Driver");
+//        config.setJdbcUrl("");
         sqlibrary = new SQLibrary(new BeeDataSource(config));
     }
 
@@ -40,7 +42,7 @@ public class SQLibraryTest {
         Set<SQLTestHandler> tests = new LinkedHashSet<>();
         tests.add(new InsertData());
         tests.add(new Exist());
-//        tests.add(new Custom());
+        tests.add(new Custom());
         tests.add(new Select());
         tests.add(new SelectFirst());
         tests.add(new SelectAll());

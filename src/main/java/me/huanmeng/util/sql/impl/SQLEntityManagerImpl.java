@@ -10,6 +10,7 @@ import cc.carm.lib.easysql.api.builder.UpdateBuilder;
 import me.huanmeng.util.sql.api.SQLAsyncEntityManager;
 import me.huanmeng.util.sql.api.SQLEntityManager;
 import me.huanmeng.util.sql.api.SQLOrderData;
+import me.huanmeng.util.sql.util.BiConsumerThrowable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,7 +20,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
 
 /**
  * 2022/1/29<br>
@@ -458,8 +458,12 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     }
 
     @Override
-    public void custom(@NotNull BiConsumer<SQLManager, SQLEntityInstance<T>> run) {
-        run.accept(holder.sqlManager(), holder);
+    public void custom(@NotNull BiConsumerThrowable<SQLManager, SQLEntityInstance<T>, SQLException> run) {
+        try {
+            run.accept(holder.sqlManager(), holder);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
