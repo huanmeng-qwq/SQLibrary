@@ -38,6 +38,7 @@ public class SQLEntityFieldMetaData<I, T> {
     protected final SQLibrary sqlibrary;
     protected final Field field;
     protected String fieldName;
+    protected String remapName;
     protected boolean key;
     protected Class<?> type;
     protected Class<?> componentType;
@@ -78,6 +79,15 @@ public class SQLEntityFieldMetaData<I, T> {
         return indexType;
     }
 
+    public SQLEntityFieldMetaData<I, T> remapName(String remapName) {
+        this.remapName = remapName;
+        return this;
+    }
+
+    public String remapName() {
+        return remapName;
+    }
+
     /**
      * 初始化
      */
@@ -93,6 +103,11 @@ public class SQLEntityFieldMetaData<I, T> {
                         this.fieldName = this.field.getName();
                     } else {
                         this.fieldName = f.value();
+                    }
+                    if (f.remapName().trim().isEmpty()) {
+                        this.remapName = this.fieldName;
+                    } else {
+                        this.remapName = f.remapName();
                     }
                     this.order = f.orderBy();
                     this.indexType = f.index();

@@ -75,7 +75,7 @@ public class SQLEntityInstance<T> {
         // alter - 如果之前的表的结构类型不一致则自动转换为一致.
         Set<String> dbColumns;
         try {
-            dbColumns = sqlManager.fetchTableMetadata(tableName()).listColumns().get();
+            dbColumns = new LinkedHashSet<>(sqlManager.fetchTableMetadata(tableName()).listColumns().get());
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }

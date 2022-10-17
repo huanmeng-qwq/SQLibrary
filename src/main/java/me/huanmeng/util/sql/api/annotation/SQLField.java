@@ -51,6 +51,8 @@ public @interface SQLField {
      */
     String sqlType() default "";
 
+    String remapName() default "";
+
     /**
      * 默认查询排序
      */
