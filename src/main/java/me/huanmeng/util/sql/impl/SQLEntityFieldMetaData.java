@@ -48,6 +48,7 @@ public class SQLEntityFieldMetaData<I, T> {
     protected String simpleName;
     protected SQLField.Serialize serialize = SQLField.Serialize.NONE;
     protected IndexType indexType = IndexType.UNIQUE_KEY;
+    protected boolean notNull;
 
     // serialize
     protected JsonSerializer<?> jsonSerializer;
@@ -112,6 +113,7 @@ public class SQLEntityFieldMetaData<I, T> {
                     this.order = f.orderBy();
                     this.indexType = f.index();
                     this.key = f.id();
+                    this.notNull = f.notNull();
                     if (!f.sqlType().trim().isEmpty()) {
                         String[] split = f.sqlType().split(",");
                         for (int i = 0; i < split.length; i++) {
@@ -286,5 +288,12 @@ public class SQLEntityFieldMetaData<I, T> {
     @Nullable
     public JsonSerializer jsonSerializer() {
         return jsonSerializer;
+    }
+
+    /**
+     * @return {@link SQLField#notNull()}
+     */
+    public boolean notNull() {
+        return notNull;
     }
 }

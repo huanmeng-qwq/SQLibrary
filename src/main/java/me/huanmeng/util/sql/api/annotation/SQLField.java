@@ -39,6 +39,8 @@ public @interface SQLField {
      */
     boolean isAutoIncrement() default false;
 
+    boolean notNull() default false;
+
     /**
      * {@link IndexType}
      */

@@ -3,6 +3,7 @@ package me.huanmeng.util.sql.impl;
 import cc.carm.lib.easysql.api.SQLAction;
 import cc.carm.lib.easysql.api.SQLManager;
 import cc.carm.lib.easysql.api.SQLQuery;
+import cc.carm.lib.easysql.api.action.SQLUpdateAction;
 import cc.carm.lib.easysql.api.builder.ConditionalBuilder;
 import cc.carm.lib.easysql.api.builder.DeleteBuilder;
 import cc.carm.lib.easysql.api.builder.TableQueryBuilder;
@@ -373,11 +374,21 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     @Override
     public @Nullable T insert(@NotNull T entity) {
         try {
-            holder.sqlManager().createInsert(holder.tableName())
+            SQLUpdateAction<?> updateAction = holder.sqlManager().createInsert(holder.tableName())
                     .setColumnNames(holder.names())
-                    .setParams(holder.values(entity))
-                    .returnGeneratedKey()
-                    .execute();
+                    .setParams(holder.values(entity));
+            boolean supportReturnKey = holder.isSupportReturnKey();
+            SQLEntityFieldMetaData<T, Object> autoIncrementField = null;
+            if (supportReturnKey) {
+                //noinspection unchecked
+                autoIncrementField = holder.metaData().getAutoIncrementFields().get(0);
+                updateAction = updateAction.returnGeneratedKey(((Class) autoIncrementField.type()));
+            }
+            Number o = updateAction.execute();
+            if (supportReturnKey) {
+                System.out.println("DBID: " + o);
+                return selectFirst(new String[]{autoIncrementField.fieldName()}, o);
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

@@ -54,7 +54,9 @@ public class SQLEntityInstance<T> {
             if (field.autoIncrement()) {
                 table.addAutoIncrementColumn(field.fieldName(), true, true);
             } else {
-                table.addColumn(field.fieldName(), field.sqlType().toSQLString());
+                table.addColumn(field.fieldName(), field.sqlType().toSQLString() +
+                        (field.notNull() ? " NOT NULL" : "")
+                );
             }
         }
         // 这里的keys集合会存在修改 但是alter也需要 所以这里先存一份在这里
@@ -291,5 +293,10 @@ public class SQLEntityInstance<T> {
     public SQLEntityInstance<T> tableName(@NotNull String tableName) {
         this.tableName = tableName;
         return this;
+    }
+
+    public boolean isSupportReturnKey() {
+        List<SQLEntityFieldMetaData<T, Object>> autoIncrementFields = metaData.getAutoIncrementFields();
+        return autoIncrementFields.size() == 1;
     }
 }
