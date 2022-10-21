@@ -1,6 +1,7 @@
 package me.huanmeng.util.sql.type;
 
 import me.huanmeng.util.sql.api.SQLTypeParser;
+import me.huanmeng.util.sql.impl.SQLEntityFieldMetaData;
 import me.huanmeng.util.sql.util.BasicType;
 import me.huanmeng.util.sql.util.BiFunctionThrowable;
 import me.huanmeng.util.sql.util.ClassUtil;
@@ -50,6 +51,12 @@ public class SQLTypes {
         }));
         registerSQLTypeWithParser(InputStream.class, new SQLType<>("BLOB"), SQLTypeParser.of(ResultSet::getBinaryStream));
 
+        registerSQLTypeWithParser(Enum.class, new SQLType<>("VARCHAR", 100), new SQLTypeParser<Enum>() {
+            @Override
+            public <I> Enum parser(ResultSet resultSet, String fieldName, SQLEntityFieldMetaData<I, Enum> fieldMetaData) throws SQLException {
+                return Enum.valueOf(fieldMetaData.type(), resultSet.getString(fieldName));
+            }
+        });
         if (HutoolAdapter.supportHutool()) {
             HutoolAdapter.registerSQLType(this);
         }
@@ -83,6 +90,9 @@ public class SQLTypes {
      * @apiNote 未注册则返回VARCHAR, 255
      */
     public <T> SQLType<T> getSQLType(Class<?> clazz) {
+        if (clazz.isEnum()) {
+            return (SQLType<T>) types.get(Enum.class);
+        }
         return (SQLType<T>) types.computeIfAbsent(ClassUtil.isBasicType(clazz) ? BasicType.unWrap(clazz) : clazz, e -> {
             log.warning("No SQLType registered for class " + clazz.getName());
             log.warning("Using default SQLType(VARCHAR 255) for class " + clazz.getName());

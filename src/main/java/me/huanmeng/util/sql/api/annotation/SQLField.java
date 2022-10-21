@@ -6,6 +6,7 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
+import me.huanmeng.util.sql.api.SQLTypeParser;
 import me.huanmeng.util.sql.api.SQLibrary;
 import me.huanmeng.util.sql.impl.SQLEntityFieldMetaData;
 import org.jetbrains.annotations.Nullable;
@@ -52,6 +53,8 @@ public @interface SQLField {
      * MEDIUMINT<br>
      */
     String sqlType() default "";
+
+    Class<? extends SQLTypeParser> parser() default SQLTypeParser.class;
 
     String remapName() default "";
 

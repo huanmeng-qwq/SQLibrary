@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -134,6 +135,10 @@ public class SQLEntityFieldMetaData<I, T> {
                         SQLTypeParser<T> sqlTypeParser = sqlType.typeParser();
                         // def: 191=767/4
                         sqlType = new SQLType<T>(sqlType.name(), Math.floorDiv(MAX_KEY_LENGTH, CHAR_BYTE)).typeParser(sqlTypeParser);
+                    }
+
+                    if(!Objects.equals(f.parser(),SQLTypeParser.class)){
+                        sqlType.typeParser(ReflectUtil.newInstanceIfPossible(f.parser()));
                     }
                     this.autoIncrement = f.isAutoIncrement();
                     this.serialize = f.serialize();

@@ -1,11 +1,14 @@
 package me.huanmeng.util.sql;
 
 import com.google.gson.*;
+import me.huanmeng.util.sql.api.SQLTypeParser;
 import me.huanmeng.util.sql.api.annotation.SQLEntity;
 import me.huanmeng.util.sql.api.annotation.SQLField;
-import me.huanmeng.util.sql.api.annotation.SQLJson;
+import me.huanmeng.util.sql.impl.SQLEntityFieldMetaData;
 
 import java.lang.reflect.Type;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +24,7 @@ import java.util.Objects;
 public class UserData {
     @SQLField(id = true, isAutoIncrement = true)
     private Long dbId;
-    @SQLField
+    @SQLField(notNull = true, parser = Parser.class)
     private String username;
     @SQLField
     private Integer age;
@@ -76,6 +79,14 @@ public class UserData {
                 ", username='" + username + '\'' +
                 ", age=" + age +
                 '}';
+    }
+
+    public static class Parser implements SQLTypeParser<String> {
+
+        @Override
+        public <I> String parser(ResultSet resultSet, String fieldName, SQLEntityFieldMetaData<I, String> fieldMetaData) throws SQLException {
+            return resultSet.getString(fieldName);
+        }
     }
 
     private static class UserDataSerializer implements JsonSerializer<List<String>>, JsonDeserializer<List<String>> {
