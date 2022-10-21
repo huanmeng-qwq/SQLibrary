@@ -386,7 +386,6 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
             }
             Number o = updateAction.execute();
             if (supportReturnKey) {
-                System.out.println("DBID: " + o);
                 return selectFirst(new String[]{autoIncrementField.fieldName()}, o);
             }
         } catch (SQLException e) {
