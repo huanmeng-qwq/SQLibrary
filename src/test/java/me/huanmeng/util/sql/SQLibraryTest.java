@@ -2,6 +2,7 @@ package me.huanmeng.util.sql;
 
 import cc.carm.lib.easysql.beecp.BeeDataSource;
 import cc.carm.lib.easysql.beecp.BeeDataSourceConfig;
+import me.huanmeng.util.sql.api.SQLEntityManager;
 import me.huanmeng.util.sql.api.SQLibrary;
 import me.huanmeng.util.sql.handlers.*;
 import org.jetbrains.annotations.NotNull;
@@ -31,14 +32,14 @@ public class SQLibraryTest {
         BeeDataSourceConfig config = new BeeDataSourceConfig();
         config.setDriverClassName("org.h2.Driver");
         config.setJdbcUrl("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;MODE=MYSQL;");
-//        config.setJdbcUrl("com.mysql.cj.jdbc.Driver");
-//        config.setJdbcUrl("");
         sqlibrary = new SQLibrary(new BeeDataSource(config));
     }
 
     @Test
     public void test() {
         print("加载测试类...");
+        SQLEntityManager<TestModel> manager = sqlibrary.manager(TestModel.class);
+        manager.insert(new TestModel(null, "a", "class"));
         Set<SQLTestHandler> tests = new LinkedHashSet<>();
         tests.add(new InsertData());
         tests.add(new Exist());

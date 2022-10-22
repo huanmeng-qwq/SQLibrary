@@ -174,7 +174,7 @@ public class SQLEntityFieldMetaData<I, T> {
                 }
             }
             if (HutoolAdapter.supportHutool()) {
-                HutoolAdapter.setFieldValue(field, type(), obj, instance);
+                HutoolAdapter.setFieldValue(field, type(), instance, obj);
             } else {
                 field.set(instance, obj);
             }
