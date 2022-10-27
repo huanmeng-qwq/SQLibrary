@@ -382,7 +382,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
                 Integer id = updateAction.returnGeneratedKey(Integer.class).execute();
                 return selectFirst(new String[]{fields.get(0).fieldName}, id);
             }
-
+            updateAction.execute();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
