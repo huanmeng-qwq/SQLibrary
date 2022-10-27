@@ -303,7 +303,6 @@ public class SQLEntityInstance<T> {
         return this;
     }
 
-    @Deprecated
     public boolean isSupportReturnKey() {
         List<SQLEntityFieldMetaData<T, Object>> autoIncrementFields = metaData.getAutoIncrementFields();
         return autoIncrementFields.size() == 1;
