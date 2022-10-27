@@ -47,11 +47,13 @@ public class SQLEntityInstance<T> {
         // create table.
         TableCreateBuilder table = sqlManager.createTable(tableName());
         List<String> keys = new ArrayList<>();
+        boolean primaryKey = false;
         for (SQLEntityFieldMetaData<T, Object> field : metaData.fields()) {
-            if (field.key() && field.indexType() == null) {
+            if (field.key() && field.indexType() == null && !field.autoIncrement()) {
                 keys.add(field.fieldName());
             }
             if (field.autoIncrement()) {
+                primaryKey = true;
                 table.addAutoIncrementColumn(field.fieldName(), true, true);
             } else {
                 table.addColumn(field.fieldName(), field.sqlType().toSQLString() +
@@ -62,7 +64,7 @@ public class SQLEntityInstance<T> {
         // 这里的keys集合会存在修改 但是alter也需要 所以这里先存一份在这里
         ArrayList<String> alterList = new ArrayList<>(keys);
         List<String> columnName = new ArrayList<>();
-        if (keys.size() == 1) {
+        if (keys.size() == 1 && !primaryKey) {
             String s = keys.remove(0);
             columnName.add(s);
             table.setIndex(s, IndexType.PRIMARY_KEY);
