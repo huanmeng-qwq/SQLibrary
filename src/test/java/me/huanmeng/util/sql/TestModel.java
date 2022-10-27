@@ -11,6 +11,7 @@ import me.huanmeng.util.sql.api.annotation.SQLField;
 public class TestModel {
     @SQLField(id = true,isAutoIncrement = true)
     private Long sid;
+    @SQLField(id = true)
     private String username;
     private String clazz;
 

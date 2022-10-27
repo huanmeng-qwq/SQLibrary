@@ -1,6 +1,5 @@
 package me.huanmeng.util.sql.api.annotation;
 
-import cc.carm.lib.easysql.api.enums.IndexType;
 import com.google.gson.Gson;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
@@ -45,7 +44,7 @@ public @interface SQLField {
     /**
      * {@link IndexType}
      */
-    IndexType index() default IndexType.UNIQUE_KEY;
+    IndexType index() default IndexType.NONE;
 
     /**
      * 数据类型<br>
@@ -75,6 +74,34 @@ public @interface SQLField {
         NONE,
         ASC,
         DESC
+    }
+
+    enum IndexType {
+        NONE,
+        INDEX,
+        UNIQUE_KEY,
+        PRIMARY_KEY,
+        FULLTEXT_INDEX;
+
+        public cc.carm.lib.easysql.api.enums.IndexType get() {
+            switch (this) {
+                case INDEX: {
+                    return cc.carm.lib.easysql.api.enums.IndexType.INDEX;
+                }
+                default: {
+                    return null;
+                }
+                case UNIQUE_KEY: {
+                    return cc.carm.lib.easysql.api.enums.IndexType.UNIQUE_KEY;
+                }
+                case PRIMARY_KEY: {
+                    return cc.carm.lib.easysql.api.enums.IndexType.PRIMARY_KEY;
+                }
+                case FULLTEXT_INDEX: {
+                    return cc.carm.lib.easysql.api.enums.IndexType.FULLTEXT_INDEX;
+                }
+            }
+        }
     }
 
     /**

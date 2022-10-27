@@ -377,17 +377,23 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
             SQLUpdateAction<?> updateAction = holder.sqlManager().createInsert(holder.tableName())
                     .setColumnNames(holder.names())
                     .setParams(holder.values(entity));
-            boolean supportReturnKey = holder.isSupportReturnKey();
+            if (holder.isSupportReturnKey()) {
+                List<SQLEntityFieldMetaData<T, Object>> fields = holder.metaData.getAutoIncrementFields();
+                Integer id = updateAction.returnGeneratedKey(Integer.class).execute();
+                return selectFirst(new String[]{fields.get(0).fieldName}, id);
+            }
+            /*boolean supportReturnKey = holder.isSupportReturnKey();
             SQLEntityFieldMetaData<T, Object> autoIncrementField = null;
             if (supportReturnKey) {
                 //noinspection unchecked
                 autoIncrementField = holder.metaData().getAutoIncrementFields().get(0);
-                updateAction = updateAction.returnGeneratedKey(((Class) autoIncrementField.type()));
+                updateAction.returnGeneratedKey();
             }
             Number o = updateAction.execute();
             if (supportReturnKey) {
                 return selectFirst(new String[]{autoIncrementField.fieldName()}, o);
-            }
+            }*/
+            System.out.println(updateAction.execute());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

@@ -112,7 +112,7 @@ public class SQLEntityFieldMetaData<I, T> {
                         this.remapName = f.remapName();
                     }
                     this.order = f.orderBy();
-                    this.indexType = f.index();
+                    this.indexType = f.index().get();
                     this.key = f.id();
                     this.notNull = f.notNull();
                     if (!f.sqlType().trim().isEmpty()) {
@@ -137,7 +137,7 @@ public class SQLEntityFieldMetaData<I, T> {
                         sqlType = new SQLType<T>(sqlType.name(), Math.floorDiv(MAX_KEY_LENGTH, CHAR_BYTE)).typeParser(sqlTypeParser);
                     }
 
-                    if(!Objects.equals(f.parser(),SQLTypeParser.class)){
+                    if (!Objects.equals(f.parser(), SQLTypeParser.class)) {
                         sqlType.typeParser(ReflectUtil.newInstanceIfPossible(f.parser()));
                     }
                     this.autoIncrement = f.isAutoIncrement();

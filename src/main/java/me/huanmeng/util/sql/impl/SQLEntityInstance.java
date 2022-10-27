@@ -48,7 +48,7 @@ public class SQLEntityInstance<T> {
         TableCreateBuilder table = sqlManager.createTable(tableName());
         List<String> keys = new ArrayList<>();
         for (SQLEntityFieldMetaData<T, Object> field : metaData.fields()) {
-            if (field.key()) {
+            if (field.key() && field.indexType() == null) {
                 keys.add(field.fieldName());
             }
             if (field.autoIncrement()) {
@@ -61,13 +61,19 @@ public class SQLEntityInstance<T> {
         }
         // 这里的keys集合会存在修改 但是alter也需要 所以这里先存一份在这里
         ArrayList<String> alterList = new ArrayList<>(keys);
+        List<String> columnName = new ArrayList<>();
         if (keys.size() == 1) {
-            table.setIndex(keys.remove(0), IndexType.PRIMARY_KEY);
+            String s = keys.remove(0);
+            columnName.add(s);
+            table.setIndex(s, IndexType.PRIMARY_KEY);
         } else if (keys.size() >= 2) {
-            table.setIndex(IndexType.PRIMARY_KEY, null, keys.remove(0), keys.toArray(new String[0]));
+            for (String s : keys) {
+                columnName.add(s);
+                table.setIndex(s, IndexType.UNIQUE_KEY);
+            }
         }
         for (SQLEntityFieldMetaData<T, Object> field : metaData.fields()) {
-            if (keys.contains(field.fieldName())) {
+            if (field.indexType() != null && !columnName.contains(field.fieldName())) {
                 table.setIndex(field.fieldName(), field.indexType());
             }
         }
@@ -295,6 +301,7 @@ public class SQLEntityInstance<T> {
         return this;
     }
 
+    @Deprecated
     public boolean isSupportReturnKey() {
         List<SQLEntityFieldMetaData<T, Object>> autoIncrementFields = metaData.getAutoIncrementFields();
         return autoIncrementFields.size() == 1;
