@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 2022/1/29<br>
@@ -410,7 +411,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
     public @Nullable T updateOrInsert(@NotNull T entity) {
         if (exist(entity)) {
             update(entity);
-            return null;
+            return select(entity);
         }
         return insert(entity);
     }
@@ -420,7 +421,20 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
         boolean exist;
         TableQueryBuilder tableQueryBuilder = holder.sqlManager().createQuery()
                 .inTable(holder.tableName());
-        fillCondition(tableQueryBuilder, holder.names(false), holder.values(entity));
+        List<SQLEntityFieldMetaData<T, Object>> list = holder.metaData().getAutoIncrementFields();
+        List<SQLEntityFieldMetaData<T, Object>> collect = holder.metaData().fields().stream().filter(e -> !e.autoIncrement() && e.key()).collect(Collectors.toList());
+        if (list.isEmpty() && !collect.isEmpty()) {
+            for (SQLEntityFieldMetaData<T, Object> fieldMetaData : collect) {
+                Object entityValue = fieldMetaData.getEntityValue(entity);
+                if (entityValue == null) {
+                    continue;
+                }
+                tableQueryBuilder.addCondition(fieldMetaData.fieldName, entityValue);
+            }
+        } else {
+            fillCondition(tableQueryBuilder, holder.names(false), holder.values(entity));
+        }
+        System.out.println(tableQueryBuilder.build().getSQLContent());
         try (SQLQuery query = tableQueryBuilder
                 .build()
                 .execute()) {

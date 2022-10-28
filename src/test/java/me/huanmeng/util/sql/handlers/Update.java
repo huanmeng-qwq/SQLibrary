@@ -24,9 +24,11 @@ public class Update extends SQLTestHandler {
         manager.update(jeb);
         Assert.assertEquals(manager.select("Jeb"), jeb);
 
-        UserData userData = manager.updateOrInsert(new UserData(null, "TestUser", 10));
+        UserData userData = manager.updateOrInsert(new UserData(null, "Jeb", 10));
         Assert.assertNotNull(userData);
         Assert.assertEquals(manager.selectFirst(((Object) null), 10), userData);
+
+        manager.updateOrInsert(new UserData(null, "Jeb", 18));
 
         manager.delete(userData);
         Assert.assertNull(manager.select("TestUser"));

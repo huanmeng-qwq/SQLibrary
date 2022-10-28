@@ -7,6 +7,7 @@ import me.huanmeng.util.sql.api.SQLibrary;
 import me.huanmeng.util.sql.handlers.*;
 import org.jetbrains.annotations.NotNull;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -39,7 +40,8 @@ public class SQLibraryTest {
     public void test() {
         print("加载测试类...");
         SQLEntityManager<TestModel> manager = sqlibrary.manager(TestModel.class);
-        manager.insert(new TestModel(null, "a", "class"));
+        manager.insert(new TestModel(1L, "a", "class"));
+        Assert.assertTrue(manager.exist(new TestModel(1L, "a", "class")));
         Set<SQLTestHandler> tests = new LinkedHashSet<>();
         tests.add(new InsertData());
         tests.add(new Exist());
