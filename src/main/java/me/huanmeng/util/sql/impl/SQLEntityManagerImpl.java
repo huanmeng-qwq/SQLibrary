@@ -434,7 +434,6 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
         } else {
             fillCondition(tableQueryBuilder, holder.names(false), holder.values(entity));
         }
-        System.out.println(tableQueryBuilder.build().getSQLContent());
         try (SQLQuery query = tableQueryBuilder
                 .build()
                 .execute()) {
