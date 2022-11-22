@@ -605,6 +605,8 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
                 continue;
             } else if (value == null && holder.metaData.sqlibrary().nullIgnore()) {
                 continue;
+            } else if (value == NULL.NULL) {
+                value = null;
             }
             map.put(names[i], value);
         }

@@ -8,4 +8,5 @@ package me.huanmeng.util.sql.type;
  */
 public class NULL {
     public static final Object IGNORE = new Object();
+    public static final Object NULL = new Object();
 }
