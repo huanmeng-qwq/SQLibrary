@@ -33,6 +33,7 @@ public class SQLibrary {
     protected Gson gson;
     protected FieldJsonSerializationContext fieldJsonSerializationContext;
     protected FieldJsonDeserializationContext fieldJsonDeserializationContext;
+    protected boolean nullIgnore = true;
 
     public SQLibrary(@NotNull DataSource dataSource) {
         this.dataSource = dataSource;
@@ -207,6 +208,15 @@ public class SQLibrary {
 
     public SQLibrary fieldJsonDeserializationContext(FieldJsonDeserializationContext fieldJsonDeserializationContext) {
         this.fieldJsonDeserializationContext = fieldJsonDeserializationContext;
+        return this;
+    }
+
+    public boolean nullIgnore() {
+        return nullIgnore;
+    }
+
+    public SQLibrary nullIgnore(boolean nullIgnore) {
+        this.nullIgnore = nullIgnore;
         return this;
     }
 }

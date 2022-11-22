@@ -11,16 +11,14 @@ import cc.carm.lib.easysql.api.builder.UpdateBuilder;
 import me.huanmeng.util.sql.api.SQLAsyncEntityManager;
 import me.huanmeng.util.sql.api.SQLEntityManager;
 import me.huanmeng.util.sql.api.SQLOrderData;
+import me.huanmeng.util.sql.type.NULL;
 import me.huanmeng.util.sql.util.BiConsumerThrowable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -151,7 +149,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
         if (orderData != null) {
             tableQueryBuilder.orderBy(orderData.name(), orderData.asc());
         }
-        fillCondition(tableQueryBuilder, true, values);
+        fillCondition(tableQueryBuilder, true, true, values);
         try (SQLQuery query = tableQueryBuilder.build().execute()) {
             if (query.getResultSet().next()) {
                 return transform(query.getResultSet());
@@ -236,7 +234,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
                 tableQueryBuilder.orderBy(sqlOrderData.name(), sqlOrderData.asc());
             }
         }
-        fillCondition(tableQueryBuilder, true, values);
+        fillCondition(tableQueryBuilder, true, true, values);
         ArrayList<T> ts = new ArrayList<>();
         try (SQLQuery query = tableQueryBuilder.build().execute()) {
             transformToList(ts, query.getResultSet());
@@ -364,7 +362,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
             return;
         }
         try {
-            fillCondition(updateBuilder, true, holder.keyValues(entity, true));
+            fillCondition(updateBuilder, true, true, holder.keyValues(entity, true));
             updateBuilder.setColumnValues(holder.names(true), holder.values(entity, true)).build()
                     .execute();
         } catch (SQLException e) {
@@ -537,7 +535,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
         boolean exist;
         TableQueryBuilder tableQueryBuilder = holder.sqlManager().createQuery()
                 .inTable(holder.tableName());
-        fillCondition(tableQueryBuilder, false, values);
+        fillCondition(tableQueryBuilder, false, true, values);
         try (SQLQuery query = tableQueryBuilder.build().execute()) {
             exist = query.getResultSet().next();
         } catch (SQLException e) {
@@ -588,8 +586,12 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
         return exist;
     }
 
-    protected void fillCondition(@NotNull ConditionalBuilder<?, ?> conditionalBuilder, boolean all, @Nullable Object... values) {
-        fillCondition(conditionalBuilder, holder.keyNames(all), values);
+    protected void fillCondition(@NotNull ConditionalBuilder<?, ?> conditionalBuilder, boolean all, boolean lenSync, @Nullable Object... values) {
+        if (lenSync) {
+            fillCondition(conditionalBuilder, Arrays.stream(holder.keyNames(all)).limit(values.length).toArray(String[]::new), values);
+        } else {
+            fillCondition(conditionalBuilder, holder.keyNames(all), values);
+        }
     }
 
     protected void fillCondition(@NotNull ConditionalBuilder<?, ?> conditionalBuilder, String[] names, @Nullable Object... values) {
@@ -599,7 +601,9 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
                 break;
             }
             Object value = values[i];
-            if (value == null) {
+            if (value == NULL.IGNORE) {
+                continue;
+            } else if (value == null && holder.metaData.sqlibrary().nullIgnore()) {
                 continue;
             }
             map.put(names[i], value);

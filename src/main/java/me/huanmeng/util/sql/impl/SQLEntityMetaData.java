@@ -91,4 +91,8 @@ public class SQLEntityMetaData<T> {
     public SQLOrderData orderData() {
         return orderData;
     }
+
+    public SQLibrary sqlibrary() {
+        return sqlibrary;
+    }
 }

@@ -4,6 +4,7 @@ import me.huanmeng.util.sql.SQLTestHandler;
 import me.huanmeng.util.sql.UserData;
 import me.huanmeng.util.sql.api.SQLEntityManager;
 import me.huanmeng.util.sql.api.SQLibrary;
+import me.huanmeng.util.sql.type.NULL;
 import org.junit.Assert;
 
 /**
@@ -26,7 +27,7 @@ public class Update extends SQLTestHandler {
 
         UserData userData = manager.updateOrInsert(new UserData(null, "Jeb", 10));
         Assert.assertNotNull(userData);
-        Assert.assertEquals(manager.selectFirst(((Object) null), 10), userData);
+        Assert.assertEquals(manager.selectFirst(NULL.IGNORE, 10), userData);
 
         manager.updateOrInsert(new UserData(null, "Jeb", 18));
 

@@ -5,6 +5,7 @@ import me.huanmeng.util.sql.UserData;
 import me.huanmeng.util.sql.api.SQLEntityManager;
 import me.huanmeng.util.sql.api.SQLOrderData;
 import me.huanmeng.util.sql.api.SQLibrary;
+import me.huanmeng.util.sql.type.NULL;
 import org.junit.Assert;
 
 import java.util.Arrays;
@@ -27,7 +28,7 @@ public class Select extends SQLTestHandler {
         );
 
         {
-            UserData userData = manager.select(new SQLOrderData("age", false), null/*dbId*/, InsertData.MSQL.getUsername());
+            UserData userData = manager.select(new SQLOrderData("age", false), NULL.IGNORE/*dbId*/, InsertData.MSQL.getUsername());
             Assert.assertEquals(userData, InsertData.MSQL);
         }
         {
