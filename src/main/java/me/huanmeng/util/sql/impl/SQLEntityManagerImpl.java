@@ -82,7 +82,7 @@ public class SQLEntityManagerImpl<T> implements SQLEntityManager<T> {
         List<T> list = new ArrayList<>();
         TableQueryBuilder builder = holder.sqlManager().createQuery()
                 .inTable(holder.tableName())
-                .addCondition(name, values);
+                .addCondition(name, Arrays.stream(values).map(o -> o == NULL.NULL ? null : o).toArray());
         SQLOrderData sqlOrderData = holder.metaData().orderData();
         if (sqlOrderData != null) {
             builder.orderBy(sqlOrderData.name(), sqlOrderData.asc());
