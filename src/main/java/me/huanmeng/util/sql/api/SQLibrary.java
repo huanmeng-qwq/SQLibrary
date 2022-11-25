@@ -8,6 +8,7 @@ import com.google.gson.GsonBuilder;
 import me.huanmeng.util.sql.gson.FieldJsonDeserializationContext;
 import me.huanmeng.util.sql.gson.FieldJsonSerializationContext;
 import me.huanmeng.util.sql.impl.SQLEntityInstance;
+import me.huanmeng.util.sql.serialize.ValueSerialize;
 import me.huanmeng.util.sql.type.SQLType;
 import me.huanmeng.util.sql.type.SQLTypes;
 import org.jetbrains.annotations.NotNull;
@@ -34,6 +35,7 @@ public class SQLibrary {
     protected FieldJsonSerializationContext fieldJsonSerializationContext;
     protected FieldJsonDeserializationContext fieldJsonDeserializationContext;
     protected boolean nullIgnore = true;
+    protected Map<String, ValueSerialize> serializeMap;
 
     public SQLibrary(@NotNull DataSource dataSource) {
         this.dataSource = dataSource;
@@ -41,6 +43,7 @@ public class SQLibrary {
         this.gson = new GsonBuilder().disableHtmlEscaping().create();
         this.fieldJsonSerializationContext = new FieldJsonSerializationContext(this.gson);
         this.fieldJsonDeserializationContext = new FieldJsonDeserializationContext(this.gson);
+        this.serializeMap = new ConcurrentHashMap<>();
     }
 
     /**
@@ -163,6 +166,7 @@ public class SQLibrary {
         return false;
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public boolean removeAll() {
         for (Map.Entry<Class<?>, SQLEntityInstance<?>> entry : INSTANCE_MAP.entrySet()) {
             SQLEntityInstance<?> sqlEntityInstance = entry.getValue();
@@ -206,7 +210,7 @@ public class SQLibrary {
         return fieldJsonDeserializationContext;
     }
 
-    public SQLibrary fieldJsonDeserializationContext(FieldJsonDeserializationContext fieldJsonDeserializationContext) {
+    public SQLibrary fieldJsonDeserializationContext(@NotNull FieldJsonDeserializationContext fieldJsonDeserializationContext) {
         this.fieldJsonDeserializationContext = fieldJsonDeserializationContext;
         return this;
     }
@@ -218,5 +222,23 @@ public class SQLibrary {
     public SQLibrary nullIgnore(boolean nullIgnore) {
         this.nullIgnore = nullIgnore;
         return this;
+    }
+
+    public Map<String, ValueSerialize> serializeMap() {
+        return serializeMap;
+    }
+
+    public SQLibrary addSerialize(@NotNull String name, @NotNull ValueSerialize serialize) {
+        serializeMap.put(name, serialize);
+        return this;
+    }
+
+    public SQLibrary removeSerialize(@NotNull String name) {
+        serializeMap.remove(name);
+        return this;
+    }
+
+    public ValueSerialize getSerialize(@NotNull String name) {
+        return serializeMap.get(name);
     }
 }

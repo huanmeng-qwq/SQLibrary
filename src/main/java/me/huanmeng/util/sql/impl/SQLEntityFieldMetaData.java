@@ -7,6 +7,7 @@ import me.huanmeng.util.sql.api.SQLibrary;
 import me.huanmeng.util.sql.api.annotation.SQLField;
 import me.huanmeng.util.sql.api.annotation.SQLIgnore;
 import me.huanmeng.util.sql.api.annotation.SQLJson;
+import me.huanmeng.util.sql.serialize.ValueSerialize;
 import me.huanmeng.util.sql.type.HutoolAdapter;
 import me.huanmeng.util.sql.type.SQLType;
 import me.huanmeng.util.sql.util.ArrayUtil;
@@ -48,6 +49,7 @@ public class SQLEntityFieldMetaData<I, T> {
     protected SQLField.Order order = SQLField.Order.NONE;
     protected String simpleName;
     protected SQLField.Serialize serialize = SQLField.Serialize.NONE;
+    protected ValueSerialize valueSerialize;
     protected IndexType indexType = IndexType.UNIQUE_KEY;
     protected boolean notNull;
 
@@ -142,6 +144,7 @@ public class SQLEntityFieldMetaData<I, T> {
                     }
                     this.autoIncrement = f.isAutoIncrement();
                     this.serialize = f.serialize();
+                    this.valueSerialize = sqlibrary.getSerialize(f.serializeName());
                     return f;
                 }).orElseGet(() -> {
                     this.fieldName = field.getName();
@@ -191,7 +194,12 @@ public class SQLEntityFieldMetaData<I, T> {
      */
     public Object getEntityValue(@NotNull I entity) {
         try {
-            Object o = serialize.serialize(this, field.get(entity));
+            Object o;
+            if (this.valueSerialize != null) {
+                o = this.valueSerialize.serialize(this, field.get(entity));
+            } else {
+                o = serialize.serialize(this, field.get(entity));
+            }
             if (o instanceof Collection) {
                 o = o.toString();
             } else if (ArrayUtil.isArray(o)) {

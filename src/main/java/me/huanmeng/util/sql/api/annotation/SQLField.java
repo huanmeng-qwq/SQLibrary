@@ -8,6 +8,7 @@ import com.google.gson.reflect.TypeToken;
 import me.huanmeng.util.sql.api.SQLTypeParser;
 import me.huanmeng.util.sql.api.SQLibrary;
 import me.huanmeng.util.sql.impl.SQLEntityFieldMetaData;
+import me.huanmeng.util.sql.serialize.ValueSerialize;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.*;
@@ -66,6 +67,12 @@ public @interface SQLField {
      * @return 序列化类型
      */
     Serialize serialize() default Serialize.NONE;
+
+    /**
+     * @return 序列化类型
+     * @apiNote {@link SQLibrary#addSerialize(String, ValueSerialize)}
+     */
+    String serializeName() default "";
 
     /**
      * 排序
