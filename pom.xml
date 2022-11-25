@@ -6,7 +6,7 @@
 
     <groupId>me.huanmeng</groupId>
     <artifactId>SQLibrary</artifactId>
-    <version>2.2.6-SNAPSHOT</version>
+    <version>2.2.7-SNAPSHOT</version>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
