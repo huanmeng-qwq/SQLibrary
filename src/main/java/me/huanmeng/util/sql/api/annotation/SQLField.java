@@ -153,7 +153,7 @@ public @interface SQLField {
                 String data = resultSet.getString(fieldMetaData.fieldName());
                 SQLibrary sqlibrary = fieldMetaData.sqlibrary();
                 if (fieldMetaData.jsonSerializer() instanceof JsonDeserializer) {
-                    JsonElement jsonElement = JsonParser.parseString(data);
+                    JsonElement jsonElement = sqlibrary.gson().toJsonTree(data);
                     //noinspection unchecked,ConstantConditions
                     T deserialize = ((JsonDeserializer<T>) fieldMetaData.jsonSerializer()).deserialize(jsonElement, TypeToken.get(instance.getClass()).getType(), sqlibrary.fieldJsonDeserializationContext());
                     fieldMetaData.setValue(instance, deserialize);
