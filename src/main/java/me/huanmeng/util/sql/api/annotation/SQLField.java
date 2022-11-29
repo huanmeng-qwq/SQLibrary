@@ -3,7 +3,6 @@ package me.huanmeng.util.sql.api.annotation;
 import com.google.gson.Gson;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import me.huanmeng.util.sql.api.SQLTypeParser;
 import me.huanmeng.util.sql.api.SQLibrary;
@@ -153,7 +152,7 @@ public @interface SQLField {
                 String data = resultSet.getString(fieldMetaData.fieldName());
                 SQLibrary sqlibrary = fieldMetaData.sqlibrary();
                 if (fieldMetaData.jsonSerializer() instanceof JsonDeserializer) {
-                    JsonElement jsonElement = sqlibrary.gson().toJsonTree(data);
+                    JsonElement jsonElement = sqlibrary.gson().fromJson(data, JsonElement.class);
                     //noinspection unchecked,ConstantConditions
                     T deserialize = ((JsonDeserializer<T>) fieldMetaData.jsonSerializer()).deserialize(jsonElement, TypeToken.get(instance.getClass()).getType(), sqlibrary.fieldJsonDeserializationContext());
                     fieldMetaData.setValue(instance, deserialize);
