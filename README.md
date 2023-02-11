@@ -7,12 +7,13 @@
 没有那么多什么事务之类的
 
 ## 示例代码
+
 您可以 [点击这里](src/test/java/me/huanmeng/util/sql/SQLibraryTest.java) 查看部分代码演示 。
 
-## 依赖方式
-### Maven依赖
+### 依赖方式
+
 <details>
-<summary>原生依赖</summary>
+<summary>Maven依赖</summary>
 
 ```xml
 
@@ -22,12 +23,11 @@
     <version>2.2.7</version>
 </dependency>
 ```
+
 </details>
 
-### Gradle依赖
-
 <details>
-<summary>原生依赖</summary>
+<summary>Gradle依赖</summary>
 
 ```groovy
 
