@@ -118,6 +118,7 @@ public interface SQLEntityManager<T> {
      * @param limit     条数
      * @param orderData 排序 可选
      * @param values    条件 所有字段
+     * @return 结果
      * @apiNote 条件数组是
      * @apiNote {@link SQLField#id()}
      * @apiNote {@link SQLField#isAutoIncrement()}
@@ -130,6 +131,7 @@ public interface SQLEntityManager<T> {
      *
      * @param orderData 排序 可选
      * @param values    条件 仅自增字段与{@link SQLField#id()}
+     * @return 结果
      * @apiNote {@link SQLField#id()}
      * @apiNote {@link SQLField#isAutoIncrement()}
      */
