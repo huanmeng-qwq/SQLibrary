@@ -16,7 +16,6 @@
 <summary>Maven依赖</summary>
 
 ```xml
-
 <dependency>
     <groupId>com.huanmeng-qwq</groupId>
     <artifactId>SQLibrary</artifactId>
@@ -30,10 +29,8 @@
 <summary>Gradle依赖</summary>
 
 ```groovy
-
 dependencies {
     api "com.huanmeng-qwq:SQLibrary:2.2.7"
 }
 ```
-
 </details>
