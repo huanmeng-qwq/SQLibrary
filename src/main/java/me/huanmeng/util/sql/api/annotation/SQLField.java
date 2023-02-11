@@ -7,12 +7,12 @@ import com.google.gson.reflect.TypeToken;
 import me.huanmeng.util.sql.api.SQLTypeParser;
 import me.huanmeng.util.sql.api.SQLibrary;
 import me.huanmeng.util.sql.impl.SQLEntityFieldMetaData;
-import me.huanmeng.util.sql.serialize.ValueSerialize;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLType;
 
 /**
  * 2022/1/28<br>
@@ -25,24 +25,27 @@ import java.sql.SQLException;
 @Target(ElementType.FIELD)
 public @interface SQLField {
     /**
-     * 字段名 (Filed Name)
+     * @return 字段名 (Filed Name)
      */
     String value() default "";
 
     /**
-     * 索引(联合索引)
+     * @return 索引(联合索引)
      */
     boolean id() default false;
 
     /**
-     * 自增id
+     * @return 该字段是否自增id
      */
     boolean isAutoIncrement() default false;
 
+    /**
+     * @return 该字段是否notNull
+     */
     boolean notNull() default false;
 
     /**
-     * {@link IndexType}
+     * @return {@link IndexType}
      */
     IndexType index() default IndexType.NONE;
 
@@ -50,15 +53,25 @@ public @interface SQLField {
      * 数据类型<br>
      * VARCHAR,255<br>
      * MEDIUMINT<br>
+     *
+     * @return {@link SQLType}
      */
     String sqlType() default "";
 
+    /**
+     * @return {@link SQLTypeParser}
+     */
     Class<? extends SQLTypeParser> parser() default SQLTypeParser.class;
 
+    /**
+     * @return remapName
+     */
     String remapName() default "";
 
     /**
      * 默认查询排序
+     *
+     * @return {@link Order}
      */
     Order orderBy() default Order.NONE;
 
@@ -69,7 +82,6 @@ public @interface SQLField {
 
     /**
      * @return 序列化类型
-     * @apiNote {@link SQLibrary#addSerialize(String, ValueSerialize)}
      */
     String serializeName() default "";
 

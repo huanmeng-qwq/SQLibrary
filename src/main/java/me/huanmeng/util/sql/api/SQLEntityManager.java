@@ -21,6 +21,7 @@ public interface SQLEntityManager<T> {
      * 查询1个实体
      *
      * @param values 条件 所有字段(不包括自增字段)
+     * @return 结果
      * @see SQLEntityInstance#keyNames()
      * @see #selectFirst(Object...)
      * @deprecated
@@ -40,6 +41,7 @@ public interface SQLEntityManager<T> {
     /**
      * @param name 字段名
      * @param o    字段值
+     * @return 结果
      */
     @Nullable T selectFirst(@NotNull String name, @NotNull Object o);
 
@@ -55,6 +57,7 @@ public interface SQLEntityManager<T> {
      * 查询1个实体
      *
      * @param values 条件 所有字段(不包括自增字段)
+     * @return 结果
      * @see SQLEntityInstance#keyNames()
      */
     @Nullable
@@ -64,6 +67,7 @@ public interface SQLEntityManager<T> {
      * 查询1个实体
      *
      * @param values 条件 所有字段(不包括自增字段)
+     * @return 结果
      * @see SQLEntityInstance#keyNames()
      */
     @Nullable
@@ -73,6 +77,7 @@ public interface SQLEntityManager<T> {
      * 查询N个实体
      *
      * @param limit 条数
+     * @return 结果
      */
     @NotNull
     List<T> select(int limit);
@@ -82,6 +87,7 @@ public interface SQLEntityManager<T> {
      *
      * @param limit     条数
      * @param orderData 排序 可选
+     * @return 结果
      */
     @NotNull
     List<T> select(int limit, @Nullable SQLOrderData orderData);
@@ -92,9 +98,7 @@ public interface SQLEntityManager<T> {
      * @param limit     条数
      * @param orderData 排序 可选
      * @param values    条件 仅自增字段与{@link SQLField#id()}
-     * @apiNote 条件数组是
-     * @apiNote {@link SQLField#id()}
-     * @apiNote {@link SQLField#isAutoIncrement()}
+     * @return 结果
      */
     @NotNull
     List<T> selectAny(int limit, @Nullable SQLOrderData orderData, @Nullable Object... values);
@@ -105,9 +109,7 @@ public interface SQLEntityManager<T> {
      * @param limit     条数
      * @param orderData 排序 可选
      * @param values    条件 所有字段(不包括自增字段)
-     * @apiNote 条件数组是
-     * @apiNote {@link SQLField#id()}
-     * @apiNote {@link SQLField#isAutoIncrement()}
+     * @return 结果
      */
     @NotNull
     List<T> selectAnyByField(int limit, @Nullable SQLOrderData orderData, @Nullable Object... values);
@@ -119,9 +121,6 @@ public interface SQLEntityManager<T> {
      * @param orderData 排序 可选
      * @param values    条件 所有字段
      * @return 结果
-     * @apiNote 条件数组是
-     * @apiNote {@link SQLField#id()}
-     * @apiNote {@link SQLField#isAutoIncrement()}
      */
     @NotNull
     List<T> selectAnyByAllField(int limit, @Nullable SQLOrderData orderData, @Nullable Object... values);
@@ -132,8 +131,6 @@ public interface SQLEntityManager<T> {
      * @param orderData 排序 可选
      * @param values    条件 仅自增字段与{@link SQLField#id()}
      * @return 结果
-     * @apiNote {@link SQLField#id()}
-     * @apiNote {@link SQLField#isAutoIncrement()}
      */
     @Nullable
     T select(@Nullable SQLOrderData orderData, @Nullable Object... values);
@@ -143,8 +140,7 @@ public interface SQLEntityManager<T> {
      *
      * @param orderData 排序 可选
      * @param values    条件 所有字段(不包括自增字段)
-     * @apiNote {@link SQLField#id()}
-     * @apiNote {@link SQLField#isAutoIncrement()}
+     * @return 结果
      */
     @Nullable
     T selectByField(@Nullable SQLOrderData orderData, @Nullable Object... values);
@@ -154,8 +150,7 @@ public interface SQLEntityManager<T> {
      *
      * @param orderData 排序 可选
      * @param values    条件 所有字段
-     * @apiNote {@link SQLField#id()}
-     * @apiNote {@link SQLField#isAutoIncrement()}
+     * @return 结果
      */
     @Nullable
     T selectByAllField(@Nullable SQLOrderData orderData, @Nullable Object... values);
@@ -164,7 +159,7 @@ public interface SQLEntityManager<T> {
      * 查询N个实体
      *
      * @param values 条件 所有字段(不包括自增字段)
-     * @apiNote {@link SQLField#id()}
+     * @return 结果
      */
     @NotNull
     List<T> selectAll(@Nullable Object... values);
@@ -173,13 +168,15 @@ public interface SQLEntityManager<T> {
      * 查询N个实体
      *
      * @param values 条件 所有字段
-     * @apiNote {@link SQLField#id()}
+     * @return 结果
      */
     @NotNull
     List<T> selectAllByAllField(@Nullable Object... values);
 
     /**
      * 查询所有实体
+     *
+     * @return 结果
      */
     @NotNull
     List<T> selectAll();
@@ -189,7 +186,6 @@ public interface SQLEntityManager<T> {
      * 前提是它已经存在
      *
      * @param entity 实例
-     * @apiNote {@link SQLField#id()}
      */
     void update(@NotNull T entity);
 
@@ -197,7 +193,7 @@ public interface SQLEntityManager<T> {
      * 写入一条数据
      *
      * @param entity 实例
-     * @apiNote {@link SQLField#id()}
+     * @return 结果
      */
     @Nullable
     T insert(@NotNull T entity);
@@ -206,7 +202,7 @@ public interface SQLEntityManager<T> {
      * 更新或写入一条数据
      *
      * @param entity 实例
-     * @apiNote {@link SQLField#id()}
+     * @return 结果
      */
     @Nullable
     T updateOrInsert(@NotNull T entity);
@@ -215,7 +211,7 @@ public interface SQLEntityManager<T> {
      * 是否存在这一条数据
      *
      * @param values 条件 仅自增字段
-     * @apiNote {@link SQLField#id()}
+     * @return 是否存在
      */
     boolean exist(@Nullable Object... values);
 
@@ -223,7 +219,7 @@ public interface SQLEntityManager<T> {
      * 是否存在这一条数据
      *
      * @param values 条件 所有字段(不包括自增字段)
-     * @apiNote {@link SQLField#id()}
+     * @return 是否存在
      */
     boolean existByField(@Nullable Object... values);
 
@@ -231,7 +227,7 @@ public interface SQLEntityManager<T> {
      * 是否存在这一条数据
      *
      * @param values 条件 所有字段
-     * @apiNote {@link SQLField#id()}
+     * @return 是否存在
      */
     boolean existByAllField(@Nullable Object... values);
 
@@ -240,6 +236,7 @@ public interface SQLEntityManager<T> {
      *
      * @param name 字段名
      * @param o    字段值
+     * @return 是否存在
      */
     boolean exist(@NotNull String name, @NotNull Object o);
 
@@ -247,7 +244,7 @@ public interface SQLEntityManager<T> {
      * 是否存在这一条数据
      *
      * @param entity 实例
-     * @apiNote {@link SQLField#id()}
+     * @return 是否存在
      */
     boolean exist(@NotNull T entity);
 
@@ -259,7 +256,7 @@ public interface SQLEntityManager<T> {
      * 不传参将删除所有的数据！！！！！！！！！！！！
      *
      * @param values 条件 所有字段(不包括自增字段)
-     * @see #delete(T)
+     * @see #delete(Object)
      */
     void delete(@NotNull Object... values);
 
@@ -267,11 +264,9 @@ public interface SQLEntityManager<T> {
      * 删除一个数据
      * <p>
      * 不传参将删除所有的数据！！！！！！！！！！！！
-     * 不传参将删除所有的数据！！！！！！！！！！！！
-     * 不传参将删除所有的数据！！！！！！！！！！！！
      *
      * @param values 条件 所有字段
-     * @see #delete(T)
+     * @see #delete(Object)
      */
     void deleteByAllField(@NotNull Object... values);
 
@@ -286,6 +281,7 @@ public interface SQLEntityManager<T> {
      * 查询一个数据
      *
      * @param entity 示例
+     * @return 结果
      */
     @Nullable
     T select(@NotNull T entity);
@@ -297,7 +293,9 @@ public interface SQLEntityManager<T> {
      */
     void custom(@NotNull BiConsumerThrowable<SQLManager, SQLEntityInstance<T>, SQLException> run);
 
-    // Debug
+    /**
+     * @return 切换Debug模式
+     */
     boolean toggleDebug();
 
     void setDebug(boolean debug);
@@ -315,6 +313,7 @@ public interface SQLEntityManager<T> {
     /**
      * {@link SQLAsyncEntityManager}也是实现了同步的方法 所以直接返回this是没有问题的
      *
+     * @return {@link SQLEntityManager}
      * @see #async()
      */
     default SQLEntityManager<T> sync() {

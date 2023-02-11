@@ -121,7 +121,6 @@ public class SQLEntityInstance<T> {
      * 创建一个新的空数据实例
      *
      * @return 空数据实例
-     * @apiNote 包装类型默认0/false
      */
     @Nullable
     public T newInstance() {

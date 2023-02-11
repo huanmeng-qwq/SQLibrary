@@ -74,6 +74,8 @@ public class SQLEntityMetaData<T> {
 
     /**
      * 要获取表明请使用{@link SQLEntityInstance#tableName()}
+     *
+     * @return 表名
      */
     @Deprecated
     @ApiStatus.ScheduledForRemoval(inVersion = "2.5")

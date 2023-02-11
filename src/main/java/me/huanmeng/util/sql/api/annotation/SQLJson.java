@@ -16,7 +16,7 @@ import java.lang.annotation.*;
 @Target(ElementType.FIELD)
 public @interface SQLJson {
     /**
-     * @apiNote 实现 {@link JsonSerializer}和{@link JsonDeserializer}
+     * @return {@link JsonSerializer} {@link JsonDeserializer}
      * @see SQLField.Serialize#JSON
      * @see SQLField.Serialize#serialize()
      */

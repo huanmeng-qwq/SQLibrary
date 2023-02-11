@@ -286,7 +286,6 @@ public class SQLEntityFieldMetaData<I, T> {
 
     /**
      * @return 数组的类型
-     * @apiNote 为数组时有效
      */
     @Nullable
     public Class<?> componentType() {

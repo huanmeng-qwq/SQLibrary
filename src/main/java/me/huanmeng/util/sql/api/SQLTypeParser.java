@@ -27,6 +27,7 @@ public interface SQLTypeParser<T> {
      *
      * @param function 方法
      * @param <T>      类型
+     * @return {@link SQLTypeParser}
      */
     static <T> SQLTypeParser<T> of(BiFunctionThrowable<ResultSet, String, T, SQLException> function) {
         return new SQLTypeParser<T>() {

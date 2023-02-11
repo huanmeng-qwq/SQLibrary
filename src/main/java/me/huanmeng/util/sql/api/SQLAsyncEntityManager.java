@@ -23,6 +23,7 @@ public interface SQLAsyncEntityManager<T> extends SQLEntityManager<T> {
      * 查询1个实体
      *
      * @param values 条件 所有字段(不包括自增字段)
+     * @return 结果
      * @see SQLEntityInstance#keyNames()
      * @see #selectFirst(Object...)
      * @deprecated
@@ -51,6 +52,7 @@ public interface SQLAsyncEntityManager<T> extends SQLEntityManager<T> {
      * 查询1个实体
      *
      * @param values 条件 所有字段(不包括自增字段)
+     * @return 结果
      * @see SQLEntityInstance#keyNames()
      */
     @NotNull
@@ -60,6 +62,7 @@ public interface SQLAsyncEntityManager<T> extends SQLEntityManager<T> {
      * 查询1个实体
      *
      * @param values 条件 所有字段(不包括自增字段)
+     * @return 结果
      * @see SQLEntityInstance#keyNames()
      */
     @NotNull
@@ -68,6 +71,7 @@ public interface SQLAsyncEntityManager<T> extends SQLEntityManager<T> {
     /**
      * @param name 字段名
      * @param o    字段值
+     * @return 结果
      */
     @NotNull
     CompletableFuture<@Nullable T> selectFirstAsync(@NotNull String name, @NotNull Object o);
@@ -76,6 +80,7 @@ public interface SQLAsyncEntityManager<T> extends SQLEntityManager<T> {
      * 查询N个实体
      *
      * @param limit 条数
+     * @return 结果
      */
     @NotNull
     CompletableFuture<@NotNull List<T>> selectAsync(int limit);
@@ -86,9 +91,7 @@ public interface SQLAsyncEntityManager<T> extends SQLEntityManager<T> {
      * @param limit     条数
      * @param orderData 排序 可选
      * @param values    条件 仅自增字段与{@link SQLField#id()}
-     * @apiNote 条件数组是
-     * @apiNote {@link SQLField#id()}
-     * @apiNote {@link SQLField#isAutoIncrement()}
+     * @return 结果
      */
     @NotNull
     CompletableFuture<@NotNull List<T>> selectAnyByFieldAsync(int limit, @Nullable SQLOrderData orderData, @Nullable Object... values);
@@ -99,9 +102,7 @@ public interface SQLAsyncEntityManager<T> extends SQLEntityManager<T> {
      * @param limit     条数
      * @param orderData 排序 可选
      * @param values    条件 所有字段
-     * @apiNote 条件数组是
-     * @apiNote {@link SQLField#id()}
-     * @apiNote {@link SQLField#isAutoIncrement()}
+     * @return 结果
      */
     @NotNull
     CompletableFuture<@NotNull List<T>> selectAnyByAllFieldAsync(int limit, @Nullable SQLOrderData orderData, @Nullable Object... values);
@@ -111,6 +112,7 @@ public interface SQLAsyncEntityManager<T> extends SQLEntityManager<T> {
      *
      * @param limit     条数
      * @param orderData 排序 可选
+     * @return 结果
      */
     @NotNull
     CompletableFuture<@NotNull List<T>> selectAsync(int limit, @Nullable SQLOrderData orderData);
@@ -121,9 +123,7 @@ public interface SQLAsyncEntityManager<T> extends SQLEntityManager<T> {
      * @param limit     条数
      * @param orderData 排序 可选
      * @param values    条件
-     * @apiNote 条件数组是
-     * @apiNote {@link SQLField#id()}
-     * @apiNote {@link SQLField#isAutoIncrement()}
+     * @return 结果
      */
     @NotNull
     CompletableFuture<@NotNull List<T>> selectAnyAsync(int limit, @Nullable SQLOrderData orderData, @NotNull Object... values);
@@ -133,8 +133,7 @@ public interface SQLAsyncEntityManager<T> extends SQLEntityManager<T> {
      *
      * @param orderData 排序 可选
      * @param values    条件 仅自增字段与{@link SQLField#id()}
-     * @apiNote {@link SQLField#id()}
-     * @apiNote {@link SQLField#isAutoIncrement()}
+     * @return 结果
      */
     @NotNull
     CompletableFuture<@Nullable T> selectAsync(@Nullable SQLOrderData orderData, @NotNull Object... values);
@@ -144,8 +143,7 @@ public interface SQLAsyncEntityManager<T> extends SQLEntityManager<T> {
      *
      * @param orderData 排序 可选
      * @param values    条件 所有字段(不包括自增字段)
-     * @apiNote {@link SQLField#id()}
-     * @apiNote {@link SQLField#isAutoIncrement()}
+     * @return 结果
      */
     @NotNull
     CompletableFuture<@Nullable T> selectByFieldAsync(@Nullable SQLOrderData orderData, @Nullable Object... values);
@@ -155,8 +153,7 @@ public interface SQLAsyncEntityManager<T> extends SQLEntityManager<T> {
      *
      * @param orderData 排序 可选
      * @param values    条件 所有字段
-     * @apiNote {@link SQLField#id()}
-     * @apiNote {@link SQLField#isAutoIncrement()}
+     * @return 结果
      */
     @NotNull
     CompletableFuture<@Nullable T> selectByAllFieldAsync(@Nullable SQLOrderData orderData, @Nullable Object... values);
@@ -165,7 +162,7 @@ public interface SQLAsyncEntityManager<T> extends SQLEntityManager<T> {
      * 查询N个实体
      *
      * @param values 条件 所有字段(不包括自增字段)
-     * @apiNote {@link SQLField#id()}
+     * @return 结果
      */
     @NotNull
     CompletableFuture<@NotNull List<T>> selectAllAsync(@NotNull Object... values);
@@ -174,13 +171,15 @@ public interface SQLAsyncEntityManager<T> extends SQLEntityManager<T> {
      * 查询N个实体
      *
      * @param values 条件 所有字段
-     * @apiNote {@link SQLField#id()}
+     * @return 结果
      */
     @NotNull
     CompletableFuture<@NotNull List<T>> selectAllByAllFieldAsync(@Nullable Object... values);
 
     /**
      * 查询所有实体
+     *
+     * @return 结果
      */
     @NotNull
     CompletableFuture<@NotNull List<T>> selectAllAsync();
@@ -190,7 +189,7 @@ public interface SQLAsyncEntityManager<T> extends SQLEntityManager<T> {
      * 前提是它已经存在
      *
      * @param entity 实例
-     * @apiNote {@link SQLField#id()}
+     * @return 结果
      */
     @NotNull
     CompletableFuture<@Nullable Void> updateAsync(@NotNull T entity);
@@ -199,7 +198,7 @@ public interface SQLAsyncEntityManager<T> extends SQLEntityManager<T> {
      * 写入一条数据
      *
      * @param entity 实例
-     * @apiNote {@link SQLField#id()}
+     * @return 结果
      */
     @NotNull
     CompletableFuture<@Nullable T> insertAsync(@NotNull T entity);
@@ -208,7 +207,7 @@ public interface SQLAsyncEntityManager<T> extends SQLEntityManager<T> {
      * 更新或写入一条数据
      *
      * @param entity 实例
-     * @apiNote {@link SQLField#id()}
+     * @return 结果
      */
     @NotNull
     CompletableFuture<@Nullable T> updateOrInsertAsync(@NotNull T entity);
@@ -217,7 +216,7 @@ public interface SQLAsyncEntityManager<T> extends SQLEntityManager<T> {
      * 是否存在这一条数据
      *
      * @param values 条件 仅自增字段
-     * @apiNote {@link SQLField#id()}
+     * @return 结果
      */
     @NotNull
     CompletableFuture<@NotNull Boolean> existAsync(@NotNull Object... values);
@@ -227,6 +226,7 @@ public interface SQLAsyncEntityManager<T> extends SQLEntityManager<T> {
      *
      * @param name 字段名
      * @param o    字段值
+     * @return 结果
      */
     @NotNull
     CompletableFuture<@NotNull Boolean> existAsync(@NotNull String name, @NotNull Object o);
@@ -235,7 +235,7 @@ public interface SQLAsyncEntityManager<T> extends SQLEntityManager<T> {
      * 是否存在这一条数据
      *
      * @param entity 实例
-     * @apiNote {@link SQLField#id()}
+     * @return 结果
      */
     @NotNull
     CompletableFuture<@NotNull Boolean> existAsync(@NotNull T entity);
@@ -244,12 +244,10 @@ public interface SQLAsyncEntityManager<T> extends SQLEntityManager<T> {
      * 删除一个数据
      * <p>
      * 不传参将删除所有的数据！！！！！！！！！！！！
-     * 不传参将删除所有的数据！！！！！！！！！！！！
-     * 不传参将删除所有的数据！！！！！！！！！！！！
      *
      * @param values 条件
-     * @apiNote {@link SQLField#id()}
-     * @see #delete(T)
+     * @return 结果
+     * @see #delete(Object)
      */
     @NotNull
     CompletableFuture<@Nullable Void> deleteAsync(@NotNull Object... values);
@@ -258,11 +256,10 @@ public interface SQLAsyncEntityManager<T> extends SQLEntityManager<T> {
      * 删除一个数据
      * <p>
      * 不传参将删除所有的数据！！！！！！！！！！！！
-     * 不传参将删除所有的数据！！！！！！！！！！！！
-     * 不传参将删除所有的数据！！！！！！！！！！！！
      *
      * @param values 条件 所有字段
-     * @see #delete(T)
+     * @return 结果
+     * @see #delete(Object)
      */
     @NotNull
     CompletableFuture<@Nullable Void> deleteByAllFieldAsync(@NotNull Object... values);
@@ -271,6 +268,7 @@ public interface SQLAsyncEntityManager<T> extends SQLEntityManager<T> {
      * 删除一条数据
      *
      * @param entity 实例
+     * @return 结果
      */
     @NotNull
     CompletableFuture<@Nullable Void> deleteAsync(@NotNull T entity);
@@ -279,6 +277,7 @@ public interface SQLAsyncEntityManager<T> extends SQLEntityManager<T> {
      * 查询一个数据
      *
      * @param entity 示例
+     * @return 结果
      */
     @NotNull
     CompletableFuture<@Nullable T> selectAsync(@NotNull T entity);
@@ -287,6 +286,7 @@ public interface SQLAsyncEntityManager<T> extends SQLEntityManager<T> {
      * 自定义操作
      *
      * @param run 执行
+     * @return 结果
      */
     @NotNull
     CompletableFuture<@Nullable Void> customAsync(@NotNull BiConsumerThrowable<SQLManager, SQLEntityInstance<T>, SQLException> run);

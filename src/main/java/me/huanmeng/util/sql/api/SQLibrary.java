@@ -47,10 +47,11 @@ public class SQLibrary {
     }
 
     /**
-     * 获取{@link SQLEntityInstance<T>}
+     * 获取{@link SQLEntityInstance}
      *
      * @param clazz      对应类
      * @param sqlManager {@link SQLManager}
+     * @return {@link SQLEntityInstance}
      */
     @NotNull
     public <T> SQLEntityInstance<T> instanceOrCreate(@NotNull Class<T> clazz, @NotNull Supplier<@NotNull SQLManager> sqlManager) {
@@ -64,9 +65,10 @@ public class SQLibrary {
     }
 
     /**
-     * 获取{@link SQLEntityInstance<T>}
+     * 获取{@link SQLEntityInstance}
      *
      * @param clazz 对应类
+     * @return {@link SQLEntityInstance}
      */
     @NotNull
     public <T> SQLEntityInstance<T> instance(@NotNull Class<T> clazz) {
@@ -76,9 +78,10 @@ public class SQLibrary {
     // ***** Sync *****
 
     /**
-     * 获取{@link SQLEntityManager<T>}
+     * 获取{@link SQLEntityManager}
      *
      * @param clazz 对应类
+     * @return {@link SQLEntityManager}
      */
     @NotNull
     public <T> SQLEntityManager<T> manager(@NotNull Class<T> clazz) {
@@ -86,9 +89,10 @@ public class SQLibrary {
     }
 
     /**
-     * 获取{@link SQLEntityManager<T>}
+     * 获取{@link SQLEntityManager}
      *
      * @param clazz 对应类
+     * @return {@link SQLEntityManager}
      */
     @NotNull
     public <T> SQLEntityManager<T> manager(@NotNull Class<T> clazz, @NotNull Supplier<@NotNull SQLManager> sqlManager) {
@@ -98,9 +102,10 @@ public class SQLibrary {
     // ***** Async *****
 
     /**
-     * 获取{@link SQLAsyncEntityManager<T>}
+     * 获取{@link SQLAsyncEntityManager}
      *
      * @param clazz 对应类
+     * @return {@link SQLAsyncEntityManager}
      */
     @NotNull
     public <T> SQLAsyncEntityManager<T> managerAsync(@NotNull Class<T> clazz) {
@@ -108,9 +113,10 @@ public class SQLibrary {
     }
 
     /**
-     * 获取{@link SQLAsyncEntityManager<T>}
+     * 获取{@link SQLAsyncEntityManager}
      *
      * @param clazz 对应类
+     * @return {@link SQLAsyncEntityManager}
      */
     @NotNull
     public <T> SQLAsyncEntityManager<T> managerAsync(@NotNull Class<T> clazz, @NotNull Supplier<@NotNull SQLManager> sqlManager) {
@@ -121,6 +127,8 @@ public class SQLibrary {
 
     /**
      * 创建{@link SQLManager}
+     *
+     * @return {@link SQLManager}
      */
     @NotNull
     public Supplier<@NotNull SQLManager> createManager() {
@@ -129,6 +137,8 @@ public class SQLibrary {
 
     /**
      * 创建{@link SQLManager}
+     *
+     * @return {@link SQLManager}
      */
     @NotNull
     public Supplier<@NotNull SQLManager> createManager(@NotNull DataSource dataSource) {

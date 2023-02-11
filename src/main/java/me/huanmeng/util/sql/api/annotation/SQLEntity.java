@@ -13,7 +13,7 @@ import java.lang.annotation.*;
 @Target(ElementType.TYPE)
 public @interface SQLEntity {
     /**
-     * 表名 (Table Name)
+     * @return 表名 (Table Name)
      */
     String value() default "";
 }
