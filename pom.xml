@@ -15,6 +15,7 @@
     </properties>
     <groupId>com.huanmeng-qwq</groupId>
     <artifactId>SQLibrary</artifactId>
+    <name>SQLibrary</name>
     <version>2.2.7</version>
 
     <scm>
