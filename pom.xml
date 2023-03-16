@@ -35,6 +35,23 @@
         </repository>
     </distributionManagement>
 
+    <url>https://github.com/huanmeng-qwq/SQLibrary</url>
+    <description>SQLibrary</description>
+
+    <licenses>
+        <license>
+            <name>MIT</name>
+            <url>https://opensource.org/licenses/MIT</url>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <name>huanmeng-qwq</name>
+            <url>https://github.com/huanmeng-qwq</url>
+            <email>huanmeng@huanmmeng-qwq.com</email>
+        </developer>
+    </developers>
+
     <repositories>
 
         <repository>
