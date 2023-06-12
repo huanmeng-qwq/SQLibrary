@@ -41,9 +41,7 @@ public class SQLType<T> {
             }
             return;
         }
-        if (HutoolAdapter.supportHutool()) {
-            fieldMetaData.setValue(instance, HutoolAdapter.getResult(rs, fieldMetaData));
-        }
+        fieldMetaData.setValue(instance, HutoolAdapter.getResult(rs, fieldMetaData));
     }
 
     @Override
