@@ -103,7 +103,7 @@ public class SQLEntityInstance<T> {
     }
 
     /**
-     * 将结果机转换为实例
+     * 将结果集转换为实例
      *
      * @param rs 结果集
      * @return 实例
