@@ -40,7 +40,13 @@ public class SQLTypes {
         registerSQLTypeWithParser(long.class, new SQLType<>("BIGINT", 20), SQLTypeParser.of(ResultSet::getLong));
         registerSQLTypeWithParser(int.class, new SQLType<>("BIGINT", 20), SQLTypeParser.of(ResultSet::getInt));
         registerSQLTypeWithParser(double.class, new SQLType<>("DOUBLE"), SQLTypeParser.of(ResultSet::getDouble));
-        registerSQLTypeWithParser(UUID.class, new SQLType<>("VARCHAR", 36), SQLTypeParser.of((BiFunctionThrowable<ResultSet, String, Object, SQLException>) (resultSet, s) -> UUID.fromString(resultSet.getString(s))));
+        registerSQLTypeWithParser(UUID.class, new SQLType<>("VARCHAR", 36), SQLTypeParser.of((BiFunctionThrowable<ResultSet, String, Object, SQLException>) (resultSet, s) -> {
+            String uuidStr = resultSet.getString(s);
+            if (uuidStr == null) {
+                return null;
+            }
+            return UUID.fromString(uuidStr);
+        }));
         registerSQLTypeWithParser(boolean.class, new SQLType<>("BOOLEAN"), SQLTypeParser.of(ResultSet::getBoolean));
 
 

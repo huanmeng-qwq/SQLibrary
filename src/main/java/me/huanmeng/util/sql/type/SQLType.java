@@ -35,7 +35,11 @@ public class SQLType<T> {
     public <I> void transform(ResultSet rs, SQLEntityFieldMetaData<I, T> fieldMetaData, I instance) {
         if (typeParser != null) {
             try {
-                fieldMetaData.setValue(instance, typeParser.parser(rs, fieldMetaData.fieldName(), fieldMetaData));
+                T obj = typeParser.parser(rs, fieldMetaData.fieldName(), fieldMetaData);
+                if (obj == null) {
+                    return;
+                }
+                fieldMetaData.setValue(instance, obj);
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }

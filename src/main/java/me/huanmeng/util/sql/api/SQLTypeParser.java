@@ -2,6 +2,7 @@ package me.huanmeng.util.sql.api;
 
 import me.huanmeng.util.sql.impl.SQLEntityFieldMetaData;
 import me.huanmeng.util.sql.util.BiFunctionThrowable;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -20,7 +21,7 @@ public interface SQLTypeParser<T> {
      * @param fieldName 字段名
      * @return 解析后的Object
      */
-    <I> T parser(ResultSet resultSet, String fieldName, SQLEntityFieldMetaData<I, T> fieldMetaData) throws SQLException;
+    @Nullable <I> T parser(ResultSet resultSet, String fieldName, SQLEntityFieldMetaData<I, T> fieldMetaData) throws SQLException;
 
     /**
      * 快速构建一个通过{@link ResultSet}中的get方法实现
@@ -32,6 +33,7 @@ public interface SQLTypeParser<T> {
     static <T> SQLTypeParser<T> of(BiFunctionThrowable<ResultSet, String, T, SQLException> function) {
         return new SQLTypeParser<T>() {
             @Override
+            @Nullable
             public <I> T parser(ResultSet resultSet, String fieldName, SQLEntityFieldMetaData<I, T> fieldMetaData) throws SQLException {
                 return function.apply(resultSet, fieldName);
             }
