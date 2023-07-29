@@ -5,7 +5,6 @@ import me.huanmeng.util.sql.impl.SQLEntityFieldMetaData;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Objects;
 
 /**
@@ -40,7 +39,7 @@ public class SQLType<T> {
                     return;
                 }
                 fieldMetaData.setValue(instance, obj);
-            } catch (SQLException e) {
+            } catch (Throwable e) {
                 throw new RuntimeException(e);
             }
             return;

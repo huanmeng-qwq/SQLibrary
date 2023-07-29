@@ -16,7 +16,7 @@
     <groupId>com.huanmeng-qwq</groupId>
     <artifactId>SQLibrary</artifactId>
     <name>SQLibrary</name>
-    <version>2.2.8</version>
+    <version>2.2.9</version>
 
     <scm>
         <connection>scm:git:git@github.com:huanmeng-qwq/SQLibrary.git</connection>

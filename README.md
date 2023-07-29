@@ -64,11 +64,11 @@
 </build>
 
 <dependencies>
-<dependency>
-    <groupId>com.huanmeng-qwq</groupId>
-    <artifactId>SQLibrary</artifactId>
-    <version>2.2.8</version>
-</dependency>
+    <dependency>
+        <groupId>com.huanmeng-qwq</groupId>
+        <artifactId>SQLibrary</artifactId>
+        <version>2.2.9</version>
+    </dependency>
 </dependencies>
 ```
 
@@ -87,7 +87,7 @@ repositories {
 }
 
 dependencies {
-    api "com.huanmeng-qwq:SQLibrary:2.2.7"
+    api "com.huanmeng-qwq:SQLibrary:2.2.9"
 }
 
 shadowJar {
