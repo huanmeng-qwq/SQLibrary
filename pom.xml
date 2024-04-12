@@ -11,7 +11,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
 
-        <easysql.version>0.4.6</easysql.version>
+        <easysql.version>0.4.7</easysql.version>
     </properties>
     <groupId>com.huanmeng-qwq</groupId>
     <artifactId>SQLibrary</artifactId>
