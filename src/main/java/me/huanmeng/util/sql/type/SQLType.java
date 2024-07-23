@@ -5,6 +5,7 @@ import me.huanmeng.util.sql.impl.SQLEntityFieldMetaData;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Objects;
 
 /**
@@ -44,9 +45,16 @@ public class SQLType<T> {
             }
             return;
         }
-        fieldMetaData.setValue(instance, HutoolAdapter.getResult(rs, fieldMetaData));
+        if (HutoolAdapter.supportHutool()) {
+            fieldMetaData.setValue(instance, HutoolAdapter.getResult(rs, fieldMetaData));
+        } else {
+            try {
+                fieldMetaData.setValue(instance, (T) rs.getString(fieldMetaData.fieldName()));
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
