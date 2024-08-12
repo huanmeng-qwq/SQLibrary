@@ -80,7 +80,7 @@
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-core</artifactId>
-            <version>5.8.29</version>
+            <version>5.8.31</version>
             <scope>provided</scope>
         </dependency>
 
