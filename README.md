@@ -67,7 +67,7 @@
     <dependency>
         <groupId>com.huanmeng-qwq</groupId>
         <artifactId>SQLibrary</artifactId>
-        <version>2.2.9</version>
+        <version>2.2.10</version>
     </dependency>
 </dependencies>
 ```
@@ -87,7 +87,7 @@ repositories {
 }
 
 dependencies {
-    api "com.huanmeng-qwq:SQLibrary:2.2.9"
+    api "com.huanmeng-qwq:SQLibrary:2.2.10"
 }
 
 shadowJar {
