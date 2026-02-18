@@ -97,8 +97,3 @@ shadowJar {
 ```
 
 </details>
-
-# 支持
-[<img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg" alt="" width="120">](https://www.jetbrains.com/?from=https://github.com/huanmeng-qwq/SQLibrary)
-
-Many thanks to Jetbrains for kindly providing a license for me to work on this and other open-source projects.
